@@ -16,8 +16,8 @@ score.delta = function(arc, network, data, score, score.delta,
     new.score = per.node.score(network = fake, score = score,
                         nodes = arc, extra.args = extra, data = data)
 
-    # update the test counter.
-    increment.test.counter(2)
+    # update the score counter.
+    increment.score.counter(2)
 
     # compare the network scores, minus numeric tolerance for better score
     # equivalence detection.
@@ -33,8 +33,8 @@ score.delta = function(arc, network, data, score, score.delta,
     new.score = per.node.score(network = fake, score = score,
                         nodes = arc[2], extra.args = extra, data = data)
 
-    # update the test counter.
-    increment.test.counter(1)
+    # update the score counter.
+    increment.score.counter(1)
 
     # compare the network scores.
     retval = new.score - reference.score[arc[2]]

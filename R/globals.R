@@ -243,3 +243,65 @@ test.counter = function() {
 
 }#TEST.COUNTER
 
+# global test permutaion counter.
+.test.permut.counter = local({
+
+  val = 0
+
+  function(new)
+    if(missing(new)) 
+      val 
+  else 
+    val <<- val + new
+
+})
+
+reset.test.permut.counter = function() {
+
+  .test.permut.counter(-.test.permut.counter())
+
+}#RESET.TEST.PERMUT.COUNTER
+
+increment.test.permut.counter = function(i = 1) {
+
+  .test.permut.counter(i)
+
+}#INCREMENT.TEST.PERMUT.COUNTER
+
+test.permut.counter = function() {
+
+  .test.permut.counter()
+
+}#TEST.PERMUT.COUNTER
+
+# global score counter.
+.score.counter = local({
+
+  val = 0
+
+  function(new)
+    if(missing(new)) 
+      val 
+  else 
+    val <<- val + new
+
+})
+
+reset.score.counter = function() {
+
+  .score.counter(-.score.counter())
+
+}#RESET.SCORE.COUNTER
+
+increment.score.counter = function(i = 1) {
+
+  .score.counter(i)
+
+}#INCREMENT.SCORE.COUNTER
+
+score.counter = function() {
+
+  .score.counter()
+
+}#SCORE.COUNTER
+

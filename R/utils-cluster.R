@@ -32,11 +32,24 @@ nSlaves = function(cluster) {
 
 slaves.setup = function(cluster) {
 
+  # export the functions dealing with the score counter.
+  clusterEvalQ(cluster, score.counter <<- bnlearn:::score.counter)
+  clusterEvalQ(cluster, increment.score.counter <<- bnlearn:::increment.score.counter)
+  clusterEvalQ(cluster, reset.score.counter <<- bnlearn:::reset.score.counter)
+  # set the score counter in all the cluster nodes.
+  clusterEvalQ(cluster, reset.score.counter())
+  
   # export the functions dealing with the test counter.
   clusterEvalQ(cluster, test.counter <<- bnlearn:::test.counter)
   clusterEvalQ(cluster, increment.test.counter <<- bnlearn:::increment.test.counter)
   clusterEvalQ(cluster, reset.test.counter <<- bnlearn:::reset.test.counter)
   # set the test counter in all the cluster nodes.
   clusterEvalQ(cluster, reset.test.counter())
-
+  
+  # export the functions dealing with the test permutation counter.
+  clusterEvalQ(cluster, test.permut.permut.counter <<- bnlearn:::test.permut.counter)
+  clusterEvalQ(cluster, increment.test.permut.counter <<- bnlearn:::increment.test.permut.counter)
+  clusterEvalQ(cluster, reset.test.permut.counter <<- bnlearn:::reset.test.permut.counter)
+  # set the test counter in all the cluster nodes.
+  clusterEvalQ(cluster, reset.test.permut.counter())
 }#SLAVE.SETUP

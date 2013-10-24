@@ -49,13 +49,13 @@ double *fact = NULL, *res = NULL, observed = 0;
 int *n = NULL, *ncolt = NULL, *nrowt = NULL, *workspace = NULL;
 int num = LENGTH(x), nr = NLEVELS(x), nc = NLEVELS(y);
 int *xx = INTEGER(x), *yy = INTEGER(y), *B = INTEGER(samples);
-int i = 0, k = 0, enough = ceil(NUM(alpha) * (*B)) + 1;
+int i = 0, k = 0, npermuts = 0, enough = ceil(NUM(alpha) * (*B)) + 1;
 SEXP result;
 
   /* allocate and initialize the result. */
-  PROTECT(result = allocVector(REALSXP, 2));
+  PROTECT(result = allocVector(REALSXP, 3));
   res = REAL(result);
-  res[0] = res[1] = 0;
+  res[0] = res[1] = res[2] = 0; // initial test result / p-value or degrees of freedom / nb permutations
 
   /* allocate and compute the factorials needed by rcont2. */
   allocfact(num);
@@ -97,6 +97,7 @@ SEXP result;
       for (k = 0; k < *B; k++) {
 
         _rcont2(&nr, &nc, nrowt, ncolt, &num, fact, workspace, n);
+        npermuts++;
 
         if (_mi(n, nrowt, ncolt, &nr, &nc, &num) > observed) {
 
@@ -116,6 +117,7 @@ SEXP result;
       for (k = 0; k < *B; k++) {
 
         _rcont2(&nr, &nc, nrowt, ncolt, &num, fact, workspace, n);
+        npermuts++;
 
         if (_x2(n, nrowt, ncolt, &nr, &nc, &num) > observed) {
 
@@ -133,6 +135,7 @@ SEXP result;
       for (k = 0; k < *B; k++) {
 
         _rcont2(&nr, &nc, nrowt, ncolt, &num, fact, workspace, n);
+        npermuts++;
         res[1] += _mi(n, nrowt, ncolt, &nr, &nc, &num);
 
       }/*FOR*/
@@ -148,6 +151,7 @@ SEXP result;
       for (k = 0; k < *B; k++) {
 
         _rcont2(&nr, &nc, nrowt, ncolt, &num, fact, workspace, n);
+        npermuts++;
         res[1] += _x2(n, nrowt, ncolt, &nr, &nc, &num);
 
       }/*FOR*/
@@ -160,6 +164,7 @@ SEXP result;
       for (k = 0; k < *B; k++) {
 
         _rcont2(&nr, &nc, nrowt, ncolt, &num, fact, workspace, n);
+        npermuts++;
 
         if (fabs(_jt(n, nrowt, &nr, &nc, &num)) >= fabs(observed)) {
 
@@ -183,6 +188,8 @@ SEXP result;
   /* save the p-value (for nonparametric tests) or the degrees of freedon (for
    * semiparametric tests). */
   res[1] = res[1] / (*B);
+  /* save the number of permutations performed. */
+  res[2] = npermuts;
 
   UNPROTECT(1);
 
@@ -198,13 +205,13 @@ int **n = NULL, **ncolt = NULL, **nrowt = NULL, *ncond = NULL, *workspace = NULL
 int num = LENGTH(x), *B = INTEGER(samples);
 int nr = NLEVELS(x), nc = NLEVELS(y), nl = NLEVELS(z);
 int *xx = INTEGER(x), *yy = INTEGER(y), *zz = INTEGER(z);
-int i = 0, j = 0, k = 0, enough = ceil(NUM(alpha) * (*B)) + 1;
+int i = 0, j = 0, k = 0, npermuts = 0, enough = ceil(NUM(alpha) * (*B)) + 1;
 SEXP result;
 
   /* allocate and initialize the result */
-  PROTECT(result = allocVector(REALSXP, 2));
+  PROTECT(result = allocVector(REALSXP, 3));
   res = REAL(result);
-  res[0] = res[1] = 0;
+  res[0] = res[1] = res[2] = 0; // initial test score / p-value or degrees of freedom / nb permutations
 
   /* allocate and compute the factorials needed by rcont2. */
   allocfact(num);
@@ -250,6 +257,7 @@ SEXP result;
 
         for (k = 0; k < nl; k++)
           _rcont2(&nr, &nc, nrowt[k], ncolt[k], &(ncond[k]), fact, workspace, n[k]);
+        npermuts++;
 
         if (_cmi(n, nrowt, ncolt, ncond, &nr, &nc, &nl) > observed) {
 
@@ -271,6 +279,7 @@ SEXP result;
 
         for (k = 0; k < nl; k++)
           _rcont2(&nr, &nc, nrowt[k], ncolt[k], &(ncond[k]), fact, workspace, n[k]);
+        npermuts++;
 
         if (_cx2(n, nrowt, ncolt, ncond, &nr, &nc, &nl) > observed) {
 
@@ -289,6 +298,7 @@ SEXP result;
 
         for (k = 0; k < nl; k++)
           _rcont2(&nr, &nc, nrowt[k], ncolt[k], &(ncond[k]), fact, workspace, n[k]);
+        npermuts++;
 
         res[1] += _cmi(n, nrowt, ncolt, ncond, &nr, &nc, &nl);
 
@@ -306,6 +316,7 @@ SEXP result;
 
         for (k = 0; k < nl; k++)
           _rcont2(&nr, &nc, nrowt[k], ncolt[k], &(ncond[k]), fact, workspace, n[k]);
+        npermuts++;
 
         res[1] += _cx2(n, nrowt, ncolt, ncond, &nr, &nc, &nl);
 
@@ -320,6 +331,7 @@ SEXP result;
 
         for (k = 0; k < nl; k++)
           _rcont2(&nr, &nc, nrowt[k], ncolt[k], &(ncond[k]), fact, workspace, n[k]);
+        npermuts++;
 
         if (fabs(_cjt(n, nrowt, ncond, &nr, &nc, &nl)) >= fabs(observed)) {
 
@@ -343,6 +355,8 @@ SEXP result;
   /* save the p-value (for nonparametric tests) or the degrees of freedon (for
    * semiparametric tests). */
   res[1] /= *B;
+  /* save the number of permutations performed. */
+  res[2] = npermuts;
 
   UNPROTECT(1);
 
@@ -353,7 +367,7 @@ SEXP result;
 /* unconditional Monte Carlo simulation for correlation-based tests. */
 SEXP gauss_mcarlo(SEXP x, SEXP y, SEXP samples, SEXP test, SEXP alpha) {
 
-int j = 0, k = 0, num = LENGTH(x), *B = INTEGER(samples);
+int j = 0, k = 0, npermuts = 0, num = LENGTH(x), *B = INTEGER(samples);
 double *xx = REAL(x), *yy = REAL(y), *yperm = NULL, *res = NULL;
 double observed = 0, enough = ceil(NUM(alpha) * (*B)) + 1, xm = 0, ym = 0;
 int *perm = NULL, *work = NULL;
@@ -378,9 +392,9 @@ SEXP result;
   ym /= num;
 
   /* allocate the result. */
-  PROTECT(result = allocVector(REALSXP, 1));
+  PROTECT(result = allocVector(REALSXP, 2));
   res = REAL(result);
-  *res = 0;
+  res[0] = res[1] = 0; // p-value / nb permutations
 
   /* initialize the random number generator. */
   GetRNGstate();
@@ -398,13 +412,14 @@ SEXP result;
       for (j = 0; j < *B; j++) {
 
         RandomPermutation(num, perm, work);
+        npermuts++;
 
         for (k = 0; k < num; k++)
           yperm[k] = yy[perm[k] - 1];
 
         if (fabs(_cov(xx, yperm, &xm, &ym, &num)) > fabs(observed)) {
 
-          sequential_counter_check(*res);
+          sequential_counter_check(res[0]);
 
         }/*THEN*/
 
@@ -417,7 +432,9 @@ SEXP result;
   PutRNGstate();
 
   /* save the observed p-value. */
-  *res /= *B;
+  res[0] /= *B;
+  /* save the number of permutations performed. */
+  res[1] = npermuts;
 
   UNPROTECT(1);
 
@@ -428,7 +445,7 @@ SEXP result;
 /* conditional Monte Carlo simulation for correlation-based tests. */
 SEXP gauss_cmcarlo(SEXP data, SEXP length, SEXP samples, SEXP test, SEXP alpha) {
 
-int j = 0, k = 0, ncols = LENGTH(data), errcode = 0, *work = NULL, *perm = NULL;
+int j = 0, k = 0, npermuts = 0, ncols = LENGTH(data), errcode = 0, *work = NULL, *perm = NULL;
 int error_counter = 0, *B = INTEGER(samples), *num = INTEGER(length);
 double observed = 0, permuted = 0, *yperm = NULL, *yorig = NULL, *res = NULL;
 double enough = ceil(NUM(alpha) * (*B)) + 1;
@@ -442,9 +459,9 @@ SEXP result;
   vt = alloc1dreal(ncols * ncols);
 
   /* allocate and initialize the result. */
-  PROTECT(result = allocVector(REALSXP, 1));
+  PROTECT(result = allocVector(REALSXP, 2));
   res = REAL(result);
-  *res = 0;
+  res[0] = res[1] = 0; // p-value / nb permutations
 
   /* allocate and initialize an array of pointers for the variables. */
   column = (double **) alloc1dpointer(ncols);
@@ -502,6 +519,7 @@ SEXP result;
         errcode = 0;
 
         RandomPermutation(*num, perm, work);
+        npermuts++;
 
         for (k = 0; k < *num; k++)
           yperm[k] = yorig[perm[k] - 1];
@@ -518,7 +536,7 @@ SEXP result;
 
         if (fabs(permuted) > fabs(observed)) {
 
-          sequential_counter_check(*res);
+          sequential_counter_check(res[0]);
 
         }/*THEN*/
 
@@ -535,7 +553,9 @@ SEXP result;
   PutRNGstate();
 
   /* save the observed p-value. */
-  *res /= *B;
+  res[0] /= *B;
+  /* save the number of permutations performed. */
+  res[1] = npermuts;
 
   UNPROTECT(1);
 

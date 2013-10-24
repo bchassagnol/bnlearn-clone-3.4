@@ -37,6 +37,11 @@ second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
   # save the status of the learning algorithm.
   learning = list(whitelist = whitelist, blacklist = blacklist,
     test = test, args = list(alpha = alpha), ntests = test.counter())
+  
+  # include the test permutation counter if any
+  npermuts = test.permut.counter()
+  if (npermuts > 0)
+    learning$args$npermuts = npermuts
 
   # include also the number of permutations/bootstrap samples
   # if it makes sense.

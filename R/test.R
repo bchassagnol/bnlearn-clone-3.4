@@ -8,6 +8,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
   sx = sx[sx != ""]
   ndata = nrow(data)
   df = NULL
+  perm.counter = NULL
 
   if (length(sx) == 0) {
 
@@ -89,6 +90,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
                     alpha = ifelse(test == "smc-mi", alpha, 1), test = 1L)
       statistic = perm.test[1]
       p.value = perm.test[2]
+      perm.counter = perm.test[3]
 
     }#THEN
     # Mutual Infomation (semiparametric)
@@ -98,6 +100,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
                     alpha = ifelse(test == "smc-mi", alpha, 1), test = 6L)
       statistic = perm.test[1]
       df = perm.test[2]
+      perm.counter = perm.test[3]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
 
     }#THEN
@@ -108,6 +111,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
                     alpha = ifelse(test == "smc-x2", alpha, 1), test = 2L)
       statistic = perm.test[1]
       p.value = perm.test[2]
+      perm.counter = perm.test[3]
 
     }#THEN
     # Pearson's X^2 test (semiparametric)
@@ -117,6 +121,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
                     alpha = ifelse(test == "smc-mi", alpha, 1), test = 7L)
       statistic = perm.test[1]
       df = perm.test[2]
+      perm.counter = perm.test[3]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
 
     }#THEN
@@ -124,16 +129,20 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
     else if ((test == "mc-mi-g") || (test == "smc-mi-g")) {
 
       statistic = mig.test(datax, datay, ndata, gsquare = TRUE)
-      p.value = gmc.test(datax, datay, samples = B,
+      perm.test = gmc.test(datax, datay, samples = B,
                   alpha = ifelse(test == "smc-mi-g", alpha, 1), test = 3L)
+      p.value = perm.test[1]
+      perm.counter = perm.test[2]
 
     }#THEN
     # Canonical (Linear) Correlation (monte carlo permutation distribution)
     else if ((test == "mc-cor") || (test == "smc-cor")) {
 
       statistic = fast.cor(datax, datay, ndata)
-      p.value = gmc.test(datax, datay, samples = B,
+      perm.test = gmc.test(datax, datay, samples = B,
                   alpha = ifelse(test == "smc-cor", alpha, 1), test = 4L)
+      p.value = perm.test[1]
+      perm.counter = perm.test[2]
 
     }#THEN
     # Fisher's Z (monte carlo permutation distribution)
@@ -141,8 +150,11 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
 
       statistic = fast.cor(datax, datay, ndata)
       statistic = log((1 + statistic)/(1 - statistic))/2 * sqrt(ndata -3)
-      p.value = gmc.test(datax, datay, samples = B,
+      perm.test = gmc.test(datax, datay, samples = B,
                   alpha = ifelse(test == "smc-zf", alpha, 1), test = 5L)
+      statistic = perm.test[1]
+      df = perm.test[2]
+      perm.counter = perm.test[3]
 
     }#THEN
     # Jonckheere-Terpstra test (monte carlo permutation distribution)
@@ -151,7 +163,9 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
       perm.test = mc.test(datax, datay, samples = B,
                     alpha = ifelse(test == "smc-jt", alpha, 1), test = 8L)
       statistic = perm.test[1]
-      p.value = perm.test[2]
+      df = perm.test[2]
+      perm.counter = perm.test[2]
+      p.value = pchisq(statistic, df, lower.tail = FALSE)
 
     }#THEN
 
@@ -328,8 +342,10 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
       df = ndata - 3 - length(sx)
       statistic = fast.pcor(x, y, sx, data, ndata, strict = !learning)
       statistic = log((1 + statistic)/(1 - statistic))/2 * sqrt(df)
-      p.value = cgmc.test(x, y, sx, data, ndata, samples = B,
+      perm.test = cgmc.test(x, y, sx, data, ndata, samples = B,
                   alpha = ifelse(test == "smc-zf", alpha, 1), test = 5L)
+      p.value = perm.test[1]
+      p.value = perm.test[2]
 
     }#THEN
     # Jonckheere-Terpstra test (monte carlo permutation distribution)
@@ -348,6 +364,10 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
   }#ELSE
 
   if (learning) {
+
+    # update the permutation counter
+    if (!is.null(perm.counter))
+      increment.test.permut.counter(perm.counter)
 
     return(p.value)
 
@@ -369,10 +389,10 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
 
     # degrees of freedom.
     if (!is.null(df))
-      result$parameter = structure(df, names = "df")
+      result$parameter[["df"]] = df
     # number of permutations.
     if (!is.null(B))
-      result$parameter = c(result$parameter, structure(B, names = "Monte Carlo samples"))
+      result$parameter[["Monte Carlo samples"]] = B
 
     return(result)
 

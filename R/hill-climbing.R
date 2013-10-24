@@ -218,9 +218,9 @@ hill.climbing = function(x, start, whitelist, blacklist, score,
 
     if (debug) {
 
-      # update the test counter of the network; very useful to check how many
+      # update the score counter of the network; very useful to check how many
       # score comparison has been done up to now.
-      start$learning$ntests = test.counter()
+      start$learning$nscores = score.counter()
 
       cat("----------------------------------------------------------------\n")
       cat("* best operation was: ")

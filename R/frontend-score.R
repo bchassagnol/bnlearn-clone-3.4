@@ -92,8 +92,10 @@ choose.direction = function(x, arc, data, criterion = NULL, ..., debug = FALSE) 
 
   }#ELSE
 
-  # set the test/score counter.
+  # set the test/score counters.
+  reset.score.counter()
   reset.test.counter()
+  reset.test.permut.counter()
 
   if (debug)
     cat("* testing", arc[1], "-", arc[2], "for direction.\n" )

@@ -3,8 +3,10 @@
 bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     test = "mi", alpha = 0.05, B = NULL, method = "gs", debug = FALSE,
     optimized = TRUE, strict = TRUE, undirected = FALSE) {
-
+  
+  reset.score.counter()
   reset.test.counter()
+  reset.test.permut.counter()
 
   res = NULL
   cluster.aware = FALSE
@@ -203,6 +205,9 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
       test = test, args = list(alpha = alpha), optimized = optimized,
       ntests = test.counter())
 
+    if (test %in% resampling.tests)
+      learning$npermuts = test.permut.counter()
+
     # include also the number of permutations/bootstrap samples
     # if it makes sense.
     if (!is.null(B))
@@ -221,10 +226,14 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
   }#ELSE
 
-  # add tests performed by the slaves to the test counter.
-  if (cluster.aware)
+  # add tests, scores and permutations performed by the slaves to the respective counters.
+  if (cluster.aware) {
     res$learning$ntests = res$learning$ntests +
       sum(unlist(clusterEvalQ(cluster, test.counter())))
+    if (test %in% resampling.tests)
+      res$learning$npermuts = res$learning$npermuts +
+        sum(unlist(clusterEvalQ(cluster, test.permut.counter())))
+  }
   # save the learning method used.
   res$learning$algo = method
   # save the 'optimized' flag.
@@ -317,8 +326,8 @@ greedy.search = function(x, start = NULL, whitelist = NULL, blacklist = NULL,
   extra.args = check.score.args(score = score, network = start,
                  data = x, extra.args = extra.args)
 
-  # reset the test counter.
-  reset.test.counter()
+  # reset the score counter.
+  reset.score.counter()
 
   # call the right backend.
   if (heuristic == "hc") {
@@ -340,7 +349,7 @@ greedy.search = function(x, start = NULL, whitelist = NULL, blacklist = NULL,
 
   # set the metadata of the network in one stroke.
   res$learning = list(whitelist = whitelist, blacklist = blacklist,
-    test = score, ntests = test.counter(),
+    test = score, nscores = score.counter(),
     algo = heuristic, args = extra.args, optimized = optimized)
 
   invisible(res)
@@ -402,10 +411,13 @@ hybrid.search = function(x, whitelist = NULL, blacklist = NULL,
   # set the metadata of the network in one stroke.
   res$learning = list(whitelist = rst$learning$whitelist,
     blacklist = rst$learning$blacklist, test = res$learning$test,
-    ntests = res$learning$ntests + rst$learning$ntests, algo = method,
+    ntests = rst$learning$ntests, nscores = res$learning$nscores, algo = method,
     args = c(res$learning$args, rst$learning$args), optimized = optimized,
     restrict = restrict, rstest = rst$learning$test, maximize = maximize,
     maxscore = res$learning$test)
+
+  if (rst$learning$test %in% resampling.tests)
+    res$learning$npermuts = rst$learning$npermuts
 
   invisible(res)
 
@@ -471,6 +483,7 @@ mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
     optimized = TRUE) {
 
   reset.test.counter()
+  reset.test.permut.counter()
 
   # check the data are there.
   check.data(x)
@@ -582,6 +595,7 @@ nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
     test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE) {
 
   reset.test.counter()
+  reset.test.permut.counter()
 
   # check the data are there.
   check.data(x)
