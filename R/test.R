@@ -26,7 +26,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
 
     }#THEN
     # Shrinked Mutual Infomation (chi-square asymptotic distribution)
-    if (test == "mi-sh") {
+    else if (test == "mi-sh") {
 
       par.test = shmi.test(datax, datay, gsquare = TRUE)
       statistic = par.test[1]
@@ -97,7 +97,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
     else if (test == "sp-mi") {
 
       perm.test = mc.test(datax, datay, samples = B,
-                    alpha = ifelse(test == "smc-mi", alpha, 1), test = 6L)
+                    alpha = 1, test = 6L)
       statistic = perm.test[1]
       df = perm.test[2]
       perm.counter = perm.test[3]
@@ -118,7 +118,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
     else if (test == "sp-x2") {
 
       perm.test = mc.test(datax, datay, samples = B,
-                    alpha = ifelse(test == "smc-mi", alpha, 1), test = 7L)
+                    alpha = 1, test = 7L)
       statistic = perm.test[1]
       df = perm.test[2]
       perm.counter = perm.test[3]
@@ -196,7 +196,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
 
     }#THEN
     # Shrinked Conditional Mutual Infomation (chi-square asymptotic distribution)
-    if (test == "mi-sh") {
+    else if (test == "mi-sh") {
 
       datax = minimal.data.frame.column(data, x)
       datay = minimal.data.frame.column(data, y)
@@ -289,7 +289,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
       datay = minimal.data.frame.column(data, y)
 
       perm.test = cmc.test(datax, datay, config, samples = B,
-                    alpha = ifelse(test == "smc-mi", alpha, 1), test = 6L)
+                    alpha = 1, test = 6L)
       statistic = perm.test[1]
       df = perm.test[2]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
@@ -314,7 +314,7 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE)
       datay = minimal.data.frame.column(data, y)
 
       perm.test = cmc.test(datax, datay, config, samples = B,
-                    alpha = ifelse(test == "smc-x2", alpha, 1), test = 7L)
+                    alpha = 1, test = 7L)
       statistic = perm.test[1]
       df = perm.test[2]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
