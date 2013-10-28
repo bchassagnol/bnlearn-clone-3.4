@@ -142,7 +142,7 @@ SEXP temp, temp2, nodes, elnames = NULL, fixed;
     PROTECT(temp2 = allocVector(STRSXP, counter));
 
     for (j = 0; j < n; j++)
-      if (checklist[UPTRI(i + 1, j + 1, n)] == 2)
+      if (checklist[UPTRI(i + 1, j + 1, n)] >= *flt)
         if (i != j)
           SET_STRING_ELT(temp2, --counter, STRING_ELT(nodes, j));
 
