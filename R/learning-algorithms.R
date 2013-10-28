@@ -401,7 +401,12 @@ hybrid.search = function(x, whitelist = NULL, blacklist = NULL,
   check.learning.algorithm(restrict, class = c("constraint", "mim"))
   check.learning.algorithm(maximize, class = "score")
   # choose the right method for the job.
-  method = ifelse((restrict == "mmpc") && (maximize == "hc"), "mmhc", "rsmax2")
+  method = if ((restrict == "mmpc") && (maximize == "hc"))
+    "mmhc"
+  else if ((restrict == "hpc") && (maximize == "hc"))
+    "h2pc"
+  else
+    "rsmax2"
 
   if (debug) {
 
@@ -413,16 +418,26 @@ hybrid.search = function(x, whitelist = NULL, blacklist = NULL,
   # restrict phase
   if (restrict %in% constraint.based.algorithms) {
 
-    rst = bnlearn(x, cluster = NULL, whitelist = whitelist, blacklist = blacklist,
-            test = restrict.args$test, alpha = restrict.args$alpha,
-            B = restrict.args$B, method = restrict, debug = debug,
-            optimized = optimized, strict = restrict.args$strict, undirected = TRUE)
+    expected = names(restrict.args) %in% c("test", "alpha", "B", "strict")
+    check.unused.args(restrict.args[!expected], method.extra.args[[restrict]])
+
+    rst = do.call(bnlearn, c(
+      list(
+        x = x, cluster = NULL, whitelist = whitelist, blacklist = blacklist,
+        method = restrict, debug = debug, optimized = optimized, undirected = TRUE),
+      restrict.args))
 
   }#THEN
   else if (restrict %in% mim.based.algorithms) {
 
-    rst = mi.matrix(x, whitelist = whitelist, blacklist = blacklist,
-            method = restrict, mi = restrict.args$mi, debug = debug)
+    expected = names(restrict.args) %in% c("mi")
+    check.unused.args(restrict.args[!expected], method.extra.args[[restrict]])
+
+    rst = do.call(mi.matrix, c(
+      list(
+        x = x, whitelist = whitelist, blacklist = blacklist,
+        method = restrict, debug = debug),
+      restrict.args))
 
   }#THEN
 

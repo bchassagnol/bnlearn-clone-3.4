@@ -158,6 +158,24 @@ mmhc = function(x, whitelist = NULL, blacklist = NULL, test = NULL,
 
 }#MMHC
 
+# H2PC frontend.
+h2pc = function(x, whitelist = NULL, blacklist = NULL, test = NULL,
+                score = NULL, alpha = 0.05, B = NULL, ..., restart = 0, perturb = 1,
+                max.iter = Inf, optimized = TRUE, strict = FALSE, debug = FALSE,
+                nbr.join = NULL, pc.method = NULL) {
+
+  restrict.args = list(test = test, alpha = alpha, B = B, strict = strict,
+                       nbr.join = nbr.join, pc.method = pc.method)
+  maximize.args = c(list(...), restart = restart,
+                    perturb = perturb, max.iter = max.iter)
+
+  hybrid.search(x, whitelist = whitelist, blacklist = blacklist,
+                restrict = "hpc", maximize = "hc", restrict.args = restrict.args,
+                maximize.args = maximize.args, score = score, optimized = optimized,
+                debug = debug)
+
+}#H2PC
+
 # Frontend for the Markov blanket learning algotrithms.
 learn.mb = function(x, node, method, whitelist = NULL, blacklist = NULL,
     start = NULL, test = NULL, alpha = 0.05, B = NULL, debug = FALSE,

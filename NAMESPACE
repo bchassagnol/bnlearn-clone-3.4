@@ -12,6 +12,7 @@ export(
   "tabu",
   "rsmax2",
   "mmhc",
+  "h2pc",
   "learn.mb",
   "learn.nbr",
   "naive.bayes",
