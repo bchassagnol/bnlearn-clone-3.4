@@ -1,15 +1,18 @@
 
 # constraint-based learning algorithms.
 bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
-    test = "mi", alpha = 0.05, B = NULL, method = "gs", debug = FALSE,
-    optimized = TRUE, strict = TRUE, undirected = FALSE) {
-  
+    test = NULL, alpha = NULL, B = NULL, method = "gs", debug = FALSE,
+    optimized = TRUE, strict = TRUE, undirected = FALSE, ...) {
+
   reset.score.counter()
   reset.test.counter()
   reset.test.permut.counter()
 
   res = NULL
   cluster.aware = FALSE
+
+  extra.args = list(...)
+  check.unused.args(extra.args, method.extra.args[[method]])
 
   # check the data are there.
   check.data(x)
@@ -169,6 +172,37 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = maxmin.pc(x = x, whitelist = whitelist, blacklist = blacklist,
         test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+
+    }#ELSE
+
+  }#THEN
+  else if (method == "hpc") {
+
+    pc.method = check.hpc.internal(extra.args$pc.method)
+    nbr.join = check.nbr.join(extra.args$nbr.join)
+
+    if (cluster.aware) {
+
+      mb = hybrid.pc.global.cluster(
+        data = x, cluster = cluster, whitelist = whitelist, blacklist = blacklist, test = test,
+        alpha = alpha, B = B, strict = strict, pc.method = pc.method,
+        nbr.join = nbr.join, debug=debug)
+
+    }#THEN
+    else if (optimized) {
+
+      mb = hybrid.pc.global.optimized(
+        data = x, whitelist = whitelist, blacklist = blacklist, test = test,
+        alpha = alpha, B = B, strict = strict, pc.method = pc.method,
+        nbr.join = nbr.join, debug=debug)
+
+    }#THEN
+    else {
+
+      mb = hybrid.pc.global(
+        data = x, whitelist = whitelist, blacklist = blacklist, test = test,
+        alpha = alpha, B = B, strict = strict, pc.method = pc.method,
+        nbr.join = nbr.join, debug=debug)
 
     }#ELSE
 
@@ -480,7 +514,7 @@ mi.matrix = function(x, whitelist = NULL, blacklist = NULL, method, mi = NULL,
 # learn the markov blanket of a single node.
 mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
     start = NULL, test = NULL, alpha = 0.05, B = NULL, debug = FALSE,
-    optimized = TRUE) {
+    optimized = TRUE, ...) {
 
   reset.test.counter()
   reset.test.permut.counter()
@@ -502,6 +536,9 @@ mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
   alpha = check.alpha(alpha)
   # check B (the number of bootstrap/permutation samples).
   B = check.B(B, test)
+
+  extra.args = list(...)
+  check.unused.args(extra.args, method.extra.args[[method]])
 
   # check the initial status of the markov blanket.
   if (!is.null(start)) {
@@ -592,7 +629,7 @@ mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
 
 # learn the neighbourhood of a single node.
 nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
-    test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE) {
+    test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE, ...) {
 
   reset.test.counter()
   reset.test.permut.counter()
@@ -614,6 +651,9 @@ nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
   alpha = check.alpha(alpha)
   # check B (the number of bootstrap/permutation samples).
   B = check.B(B, test)
+
+  extra.args = list(...)
+  check.unused.args(extra.args, method.extra.args[[method]])
 
   # sanitize and rework the whitelist.
   if (!is.null(whitelist)) {
@@ -662,6 +702,11 @@ nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
            alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
            test = test, optimized = optimized, debug = debug)
 
+    # this is the backward phase.
+    nbr = neighbour(target, mb = structure(list(nbr), names = target), data = x, 
+                    alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                    test = test, markov = FALSE, debug = debug)
+
   }#THEN
   else if (method == "si.hiton.pc") {
 
@@ -669,12 +714,21 @@ nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
             B = B, whitelist = whitelist, blacklist = blacklist, test = test,
             optimized = optimized, debug = debug) 
 
-  }#ELSE
+    # this is the backward phase.
+    nbr = neighbour(target, mb = structure(list(nbr), names = target), data = x, 
+                    alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                    test = test, markov = FALSE, debug = debug)
 
-  # this is the backward phase.
-  nbr = neighbour(target, mb = structure(list(nbr), names = target), data = x, 
-          alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
-          test = test, markov = FALSE, debug = debug)
+  }#ELSE
+  else if (method == "hpc") {
+
+    pc.method = check.hpc.internal(extra.args$pc.method)
+
+    nbr = hybrid.pc(t=target, data = x, nodes = nodes, pc.method = pc.method,
+                    alpha = alpha, B = B, whitelist = whitelist, blacklist = NULL,
+                    backtracking = NULL, test = test, debug = debug)
+
+  }#ELSE
 
   return(nbr[["nbr"]])
 
@@ -772,4 +826,3 @@ bayesian.classifier = function(data, method, training, explanatory, whitelist,
   invisible(res)
 
 }#BAYESIAN.CLASSIFIER
-

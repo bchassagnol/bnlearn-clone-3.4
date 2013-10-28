@@ -4,6 +4,7 @@ export(
   "inter.iamb",
   "fast.iamb",
   "mmpc",
+  "hpc",
   "si.hiton.pc",
   "chow.liu",
   "aracne",

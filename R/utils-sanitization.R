@@ -1752,6 +1752,8 @@ check.learning.algorithm = function(algorithm, class = "all", bn) {
     ok = c(ok, classifiers)
   if ("all" %in% class)
     ok = available.learning.algorithms
+  if ("hpc.internal" %in% class)
+    ok = setdiff(constraint.based.algorithms, "hpc")
 
   if (!(algorithm %in% ok))
        stop(paste(c("valid learning algorithms are:\n",
@@ -2197,3 +2199,26 @@ check.mutilated.evidence = function(evidence, graph) {
 
 }#CHECK.MUTILATED.EVIDENCE
 
+# Check the type of neigbourhood join : OR or AND.
+check.nbr.join = function(nbr.join, default = "AND") {
+
+  if (missing(nbr.join) || is.null(nbr.join))
+    nbr.join = default
+
+  if (!nbr.join %in% c("OR", "AND"))
+    stop("valid neighbourhood joins are OR (outer join) and AND (inner join).")
+
+  return(nbr.join)
+
+}#CHECK.NBR.JOIN
+
+check.hpc.internal = function(pc.method, default = "inter.iamb") {
+
+  if (missing(pc.method) || is.null(pc.method))
+    pc.method = default
+
+  check.learning.algorithm(pc.method, class="hpc.internal")
+
+  return(pc.method)
+
+}#CHECK.HPC.PC.METHOD

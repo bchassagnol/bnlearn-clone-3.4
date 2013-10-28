@@ -25,7 +25,7 @@ available.continuous.mi = c("mi-g")
 available.mi = c(available.discrete.mi, available.continuous.mi)
 
 markov.blanket.algorithms = c("gs", "iamb", "fast.iamb", "inter.iamb")
-local.search.algorithms = c("mmpc", "si.hiton.pc")
+local.search.algorithms = c("mmpc", "si.hiton.pc", "hpc")
 constraint.based.algorithms = c(markov.blanket.algorithms, local.search.algorithms)
 score.based.algorithms = c("hc", "tabu")
 hybrid.algorithms = c("rsmax2", "mmhc")
@@ -47,6 +47,7 @@ method.labels = c(
   'hc' = "Hill-Climbing",
   'tabu' = "Tabu Search",
   'mmpc' = "Max-Min Parent Children",
+  'hpc' = "Hybrid Parents and Children",
   'si.hiton.pc' = "Semi-Interleaved HITON-PC",
   'rsmax2' = "Two-Phase Restricted Maximization",
   'mmhc' = "Max-Min Hill-Climbing",
@@ -58,7 +59,8 @@ method.labels = c(
 
 method.extra.args = list(
   'hc' = c("max.iter", "restart", "perturb"),
-  'tabu' = c("max.iter", "tabu", "max.tabu")
+  'tabu' = c("max.iter", "tabu", "max.tabu"),
+  'hpc' = c("pc.method", "nbr.join")
 )
 
 test.labels = c(
@@ -304,4 +306,3 @@ score.counter = function() {
   .score.counter()
 
 }#SCORE.COUNTER
-

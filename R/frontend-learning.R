@@ -58,6 +58,20 @@ mmpc = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
 }#MMPC
 
+# HPC frontend.
+hpc = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
+               test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE,
+               strict = FALSE, undirected = TRUE, nbr.join = NULL,
+               pc.method = NULL) {
+
+  bnlearn(x = x, cluster = cluster, whitelist = whitelist,
+          blacklist = blacklist, test = test, alpha = alpha, B = B,
+          method = "hpc", debug = debug, optimized = optimized,
+          strict = strict, undirected = undirected, nbr.join = nbr.join,
+          pc.method = pc.method)
+
+}#HPC
+
 # Semi-Interleaved HITON-PC.
 si.hiton.pc = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE,
@@ -147,22 +161,22 @@ mmhc = function(x, whitelist = NULL, blacklist = NULL, test = NULL,
 # Frontend for the Markov blanket learning algotrithms.
 learn.mb = function(x, node, method, whitelist = NULL, blacklist = NULL,
     start = NULL, test = NULL, alpha = 0.05, B = NULL, debug = FALSE,
-    optimized = TRUE) {
+    optimized = TRUE, ...) {
 
   mb.backend(x, target = node, method = method, whitelist = whitelist,
     blacklist = blacklist, start = start, test = test, alpha = alpha,
-    B = B, debug = debug, optimized = optimized)
+    B = B, debug = debug, optimized = optimized, ...)
 
 }#LEARN.MB
 
 # Frontend for causal discovery learning algotrithms.
 learn.nbr = function(x, node, method, whitelist = NULL, blacklist = NULL,
     start = NULL, test = NULL, alpha = 0.05, B = NULL, debug = FALSE,
-    optimized = TRUE) {
+    optimized = TRUE, ...) {
 
   nbr.backend(x, target = node, method = method, whitelist = whitelist,
     blacklist = blacklist, test = test, alpha = alpha, B = B, debug = debug,
-    optimized = optimized)
+    optimized = optimized, ...)
 
 }#LEARN.NBR
 
