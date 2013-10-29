@@ -47,7 +47,7 @@ slaves.setup = function(cluster) {
   clusterEvalQ(cluster, reset.test.counter())
   
   # export the functions dealing with the test permutation counter.
-  clusterEvalQ(cluster, test.permut.permut.counter <<- bnlearn:::test.permut.counter)
+  clusterEvalQ(cluster, test.permut.counter <<- bnlearn:::test.permut.counter)
   clusterEvalQ(cluster, increment.test.permut.counter <<- bnlearn:::increment.test.permut.counter)
   clusterEvalQ(cluster, reset.test.permut.counter <<- bnlearn:::reset.test.permut.counter)
   # set the test counter in all the cluster nodes.
