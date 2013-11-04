@@ -177,6 +177,13 @@ hybrid.pc.nbr.search = function(t, data, nodes, test, alpha, B,
                                 start = start, backtracking = backtracking, test = test, debug = debug)
 
   }#THEN
+  else if (method == "fdr.iamb") {
+
+    mb = iambfdr(x = t, data = data, nodes = nodes,
+                 alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                 start = start, backtracking = backtracking, test = test, debug = debug)
+
+  }#THEN
   else {
 
     stop(paste("the local method '", method, "' is not supported yet by hpc.", sep=""))

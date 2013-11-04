@@ -46,6 +46,18 @@ inter.iamb = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
 }#INTER.IAMB
 
+# FDR-IAMB frontend.
+fdr.iamb = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
+                    test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE,
+                    strict = FALSE, undirected = FALSE) {
+
+  bnlearn(x = x, cluster = cluster, whitelist = whitelist,
+          blacklist = blacklist, test = test, alpha = alpha, B = B,
+          method = "fdr.iamb", debug = debug, optimized = optimized,
+          strict = strict, undirected =  undirected)
+
+}#FDR.IAMB
+
 # MMPC frontend.
 mmpc = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE,

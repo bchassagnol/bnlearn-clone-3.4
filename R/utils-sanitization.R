@@ -2212,7 +2212,7 @@ check.nbr.join = function(nbr.join, default = "AND") {
 
 }#CHECK.NBR.JOIN
 
-check.hpc.internal = function(pc.method, default = "inter.iamb") {
+check.hpc.internal = function(pc.method, default = "fdr.iamb") {
 
   if (missing(pc.method) || is.null(pc.method))
     pc.method = default
