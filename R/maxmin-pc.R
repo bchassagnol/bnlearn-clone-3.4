@@ -1,6 +1,6 @@
 
 maxmin.pc.optimized = function(x, whitelist, blacklist, test,
-  alpha, B, strict, debug = FALSE) {
+  alpha, test.args, strict, debug = FALSE) {
 
   nodes = names(x)
   mb = list()
@@ -11,13 +11,13 @@ maxmin.pc.optimized = function(x, whitelist, blacklist, test,
 
     # 1. [Forward Phase (I)]
     mb[[node]] = maxmin.pc.forward.phase(node, data = x, nodes = nodes,
-         alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+         alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
          backtracking = backtracking, test = test, optimized = TRUE,
          debug = debug)
 
     # 2. [Backward Phase (II)]
     mb[[node]] = neighbour(node, mb = mb, data = x, alpha = alpha,
-         B = B, whitelist = whitelist, blacklist = blacklist,
+         test.args = test.args, whitelist = whitelist, blacklist = blacklist,
          backtracking = backtracking, test = test, markov = FALSE, debug = debug)
 
   }#FOR
@@ -30,19 +30,19 @@ maxmin.pc.optimized = function(x, whitelist, blacklist, test,
 }#MAXMIN.PC.OPTIMIZED
 
 maxmin.pc.cluster = function(x, cluster, whitelist, blacklist,
-  test, alpha, B, strict, debug = FALSE) {
+  test, alpha, test.args, strict, debug = FALSE) {
 
   nodes = names(x)
 
   # 1. [Forward Phase (I)]
   mb = parLapply(cluster, as.list(nodes), maxmin.pc.forward.phase, data = x,
-         nodes = nodes, alpha = alpha, B = B, whitelist = whitelist,
+         nodes = nodes, alpha = alpha, test.args = test.args, whitelist = whitelist,
          blacklist = blacklist, test = test, optimized = FALSE, debug = debug)
   names(mb) = nodes
 
   # 2. [Backward Phase (II)]
   mb = parLapply(cluster, as.list(nodes), neighbour, mb = mb, data = x,
-         alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+         alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
          test = test, markov = FALSE, debug = debug)
   names(mb) = nodes
 
@@ -53,20 +53,20 @@ maxmin.pc.cluster = function(x, cluster, whitelist, blacklist,
 
 }#MAXMIN.PC.CLUSTER
 
-maxmin.pc = function(x, whitelist, blacklist, test, alpha, B,
+maxmin.pc = function(x, whitelist, blacklist, test, alpha, test.args,
   strict, debug = FALSE) {
 
   nodes = names(x)
 
   # 1. [Forward Phase (I)]
   mb = lapply(as.list(nodes), maxmin.pc.forward.phase, data = x, nodes = nodes,
-         alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+         alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
          test = test, optimized = FALSE, debug = debug)
   names(mb) = nodes
 
   # 2. [Backward Phase (II)]
   mb = lapply(as.list(nodes), neighbour, mb = mb, data = x, alpha = alpha,
-         B = B, whitelist = whitelist, blacklist = blacklist, test = test,
+         test.args = test.args, whitelist = whitelist, blacklist = blacklist, test = test,
          markov = FALSE, debug = debug)
   names(mb) = nodes
 
@@ -77,7 +77,7 @@ maxmin.pc = function(x, whitelist, blacklist, test, alpha, B,
 
 }#MAXMIN.PC
 
-maxmin.pc.forward.phase = function(x, data, nodes, alpha, B, whitelist,
+maxmin.pc.forward.phase = function(x, data, nodes, alpha, test.args, whitelist,
   blacklist, backtracking = NULL, test, optimized = TRUE, debug = FALSE) {
 
   nodes = nodes[nodes != x]
@@ -138,7 +138,7 @@ maxmin.pc.forward.phase = function(x, data, nodes, alpha, B, whitelist,
 
     # get an association measure for each of the available nodes.
     association = sapply(to.be.checked, maxmin.pc.heuristic.optimized, y = x,
-                    sx = cpc, data = data, test = test, alpha = alpha, B = B,
+                    sx = cpc, data = data, test = test, alpha = alpha, test.args = test.args,
                     association = association, debug = debug)
 
     # stop if there are no candidates for inclusion.
@@ -167,7 +167,7 @@ maxmin.pc.forward.phase = function(x, data, nodes, alpha, B, whitelist,
 
 }#MAXMIN.PC.FORWARD.PHASE
 
-maxmin.pc.heuristic.optimized = function(x, y, sx, data, test, alpha, B,
+maxmin.pc.heuristic.optimized = function(x, y, sx, data, test, alpha, test.args,
     association, debug = FALSE) {
 
   k = 0
@@ -195,7 +195,7 @@ maxmin.pc.heuristic.optimized = function(x, y, sx, data, test, alpha, B,
     for (s in 1:nrow(dsep.subsets)) {
 
       a = conditional.test(x, y, c(dsep.subsets[s,], last), data = data,
-            test = test, B = B, alpha = alpha)
+            test = test, test.args = test.args, alpha = alpha)
 
       if (debug) {
 

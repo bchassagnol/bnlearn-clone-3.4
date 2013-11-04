@@ -1,7 +1,7 @@
 
 # constraint-based learning algorithms.
 bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
-    test = NULL, alpha = NULL, B = NULL, method = "gs", debug = FALSE,
+    test = NULL, alpha = NULL, test.args = NULL, method = "gs", debug = FALSE,
     optimized = TRUE, strict = TRUE, undirected = FALSE, ...) {
 
   reset.score.counter()
@@ -27,8 +27,8 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
   check.logical(undirected)
   # check alpha.
   alpha = check.alpha(alpha)
-  # check B (the number of bootstrap/permutation samples).
-  B = check.B(B, test)
+  # check test parameters.
+  test.args = check.test.args(test.args, test)
 
   # check the cluster.
   if (!is.null(cluster)) {
@@ -60,20 +60,20 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = grow.shrink.cluster(x = x, cluster = cluster,
         whitelist = whitelist, blacklist = blacklist, test = test,
-        alpha = alpha, B = B, strict = strict, debug = debug)
+        alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else if (optimized) {
 
       mb = grow.shrink.optimized(x = x, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#THEN
     else {
 
       mb = grow.shrink(x = x, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#ELSE
 
@@ -84,20 +84,20 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = incremental.association.cluster(x = x, cluster = cluster,
         whitelist = whitelist, blacklist = blacklist, test = test,
-        alpha = alpha, B = B, strict = strict, debug = debug)
+        alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else if (optimized) {
 
       mb = incremental.association.optimized(x = x, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#THEN
     else {
 
       mb = incremental.association(x = x, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#ELSE
@@ -109,20 +109,20 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = fast.incremental.association.cluster(x = x, cluster = cluster,
         whitelist = whitelist, blacklist = blacklist, test = test,
-        alpha = alpha, B = B, strict = strict, debug = debug)
+        alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else if (optimized) {
 
       mb = fast.incremental.association.optimized(x = x, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#THEN
     else {
 
       mb = fast.incremental.association(x = x, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#ELSE
@@ -134,20 +134,20 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = inter.incremental.association.cluster(x = x, cluster = cluster,
         whitelist = whitelist, blacklist = blacklist, test = test,
-        alpha = alpha, B = B, strict = strict, debug = debug)
+        alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else if (optimized) {
 
       mb = inter.incremental.association.optimized(x = x, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#THEN
     else {
 
       mb = inter.incremental.association(x = x, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#ELSE
@@ -159,21 +159,21 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = iambfdr.global.cluster(
         x = x, cluster = cluster, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else if (optimized) {
 
       mb = iambfdr.global.optimized(
         x = x, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else {
 
       mb = iambfdr.global(
         x = x, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#ELSE
 
@@ -183,20 +183,20 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     if (cluster.aware) {
 
       mb = maxmin.pc.cluster(x = x, cluster = cluster, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#THEN
     else if (optimized) {
 
       mb = maxmin.pc.optimized(x = x, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else {
 
       mb = maxmin.pc(x = x, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#ELSE
 
@@ -210,7 +210,7 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = hybrid.pc.global.cluster(
         data = x, cluster = cluster, whitelist = whitelist, blacklist = blacklist, test = test,
-        alpha = alpha, B = B, strict = strict, pc.method = pc.method,
+        alpha = alpha, test.args = test.args, strict = strict, pc.method = pc.method,
         nbr.join = nbr.join, debug=debug)
 
     }#THEN
@@ -218,7 +218,7 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = hybrid.pc.global.optimized(
         data = x, whitelist = whitelist, blacklist = blacklist, test = test,
-        alpha = alpha, B = B, strict = strict, pc.method = pc.method,
+        alpha = alpha, test.args = test.args, strict = strict, pc.method = pc.method,
         nbr.join = nbr.join, debug=debug)
 
     }#THEN
@@ -226,7 +226,7 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
       mb = hybrid.pc.global(
         data = x, whitelist = whitelist, blacklist = blacklist, test = test,
-        alpha = alpha, B = B, strict = strict, pc.method = pc.method,
+        alpha = alpha, test.args = test.args, strict = strict, pc.method = pc.method,
         nbr.join = nbr.join, debug=debug)
 
     }#ELSE
@@ -237,20 +237,20 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     if (cluster.aware) {
 
       mb = si.hiton.pc.cluster(x = x, cluster = cluster, whitelist = whitelist,
-        blacklist = blacklist, test = test, alpha = alpha, B = B,
+        blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
         strict = strict, debug = debug)
 
     }#THEN
     else if (optimized) {
 
       mb = si.hiton.pc.optimized(x = x, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#THEN
     else {
 
       mb = si.hiton.pc.backend(x = x, whitelist = whitelist, blacklist = blacklist,
-        test = test, alpha = alpha, B = B, strict = strict, debug = debug)
+        test = test, alpha = alpha, test.args = test.args, strict = strict, debug = debug)
 
     }#ELSE
 
@@ -269,8 +269,13 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
     # include also the number of permutations/bootstrap samples
     # if it makes sense.
-    if (!is.null(B))
-      learning$args$B = B
+    if (!is.null(test.args$B))
+      learning$args$B = test.args$B
+
+    # include also the power rule threshold
+    # if it makes sense.
+    if (!is.null(test.args) && !is.null(test.args$power.rule))
+      learning$args$power.rule = test.args$power.rule
 
     res = list(learning = learning,
       nodes = cache.structure(names(mb), arcs = arcs), arcs = arcs)
@@ -280,7 +285,7 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
 
     # recover some arc directions.
     res = second.principle(x = x, mb = mb, whitelist = whitelist,
-            blacklist = blacklist, test = test, alpha = alpha, B = B,
+            blacklist = blacklist, test = test, alpha = alpha, test.args = test.args,
             strict = strict, debug = debug)
 
   }#ELSE
@@ -443,7 +448,7 @@ hybrid.search = function(x, whitelist = NULL, blacklist = NULL,
   # restrict phase
   if (restrict %in% constraint.based.algorithms) {
 
-    expected = names(restrict.args) %in% c("test", "alpha", "B", "strict")
+    expected = names(restrict.args) %in% c("test", "alpha", "test.args", "strict")
     check.unused.args(restrict.args[!expected], method.extra.args[[restrict]])
 
     rst = do.call(bnlearn, c(
@@ -553,7 +558,7 @@ mi.matrix = function(x, whitelist = NULL, blacklist = NULL, method, mi = NULL,
 
 # learn the markov blanket of a single node.
 mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
-    start = NULL, test = NULL, alpha = 0.05, B = NULL, debug = FALSE,
+    start = NULL, test = NULL, alpha = 0.05, test.args = NULL, debug = FALSE,
     optimized = TRUE, ...) {
 
   reset.test.counter()
@@ -574,8 +579,8 @@ mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
   check.logical(optimized)
   # check alpha.
   alpha = check.alpha(alpha)
-  # check B (the number of bootstrap/permutation samples).
-  B = check.B(B, test)
+  # check test parameters.
+  test.args = check.test.args(test.args, test)
 
   extra.args = list(...)
   check.unused.args(extra.args, method.extra.args[[method]])
@@ -637,34 +642,34 @@ mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
   if (method == "gs") {
 
     mb = gs.markov.blanket(x = target, data = x, nodes = nodes, alpha = alpha,
-           B = B, whitelist = whitelist, blacklist = NULL, start = start,
+           test.args = test.args, whitelist = whitelist, blacklist = NULL, start = start,
            backtracking = NULL, test = test, debug = debug)
 
   }#THEN
   else if (method == "iamb") {
 
     mb = ia.markov.blanket(x = target, data = x, nodes = nodes, alpha = alpha,
-           B = B, whitelist = whitelist, blacklist = NULL, start = start,
+           test.args = test.args, whitelist = whitelist, blacklist = NULL, start = start,
            backtracking = NULL, test = test, debug = debug)
 
   }#THEN
   else if (method == "fast.iamb") {
 
     mb = fast.ia.markov.blanket(x = target, data = x, nodes = nodes,
-           alpha = alpha, B = B, whitelist = whitelist, blacklist = NULL,
+           alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = NULL,
            start = start, backtracking = NULL, test = test, debug = debug)
 
   }#THEN
   else if (method == "inter.iamb") {
 
     mb = inter.ia.markov.blanket(x = target, data = x, nodes = nodes, alpha = alpha,
-           B = B, whitelist = whitelist, blacklist = NULL, start = start,
+           test.args = test.args, whitelist = whitelist, blacklist = NULL, start = start,
            backtracking = NULL, test = test, debug = debug)
 
   }#THEN
   else if (method == "fdr.iamb") {
 
-    mb = iambfdr(x = target, data = x, nodes = nodes, alpha = alpha, B = B,
+    mb = iambfdr(x = target, data = x, nodes = nodes, alpha = alpha, test.args = test.args,
                  whitelist = whitelist, blacklist = NULL, backtracking = NULL,
                  test = test, debug = debug)
 
@@ -676,7 +681,7 @@ mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
 
 # learn the neighbourhood of a single node.
 nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
-    test = NULL, alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE, ...) {
+    test = NULL, alpha = 0.05, test.args = NULL, debug = FALSE, optimized = TRUE, ...) {
 
   reset.test.counter()
   reset.test.permut.counter()
@@ -696,8 +701,8 @@ nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
   check.logical(optimized)
   # check alpha.
   alpha = check.alpha(alpha)
-  # check B (the number of bootstrap/permutation samples).
-  B = check.B(B, test)
+  # check test parameters.
+  test.args = check.test.args(test.args, test)
 
   extra.args = list(...)
   check.unused.args(extra.args, method.extra.args[[method]])
@@ -746,24 +751,24 @@ nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
   if (method == "mmpc") {
 
     nbr = maxmin.pc.forward.phase(target, data = x, nodes = nodes, 
-           alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+           alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
            test = test, optimized = optimized, debug = debug)
 
     # this is the backward phase.
     nbr = neighbour(target, mb = structure(list(nbr), names = target), data = x, 
-                    alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                    alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
                     test = test, markov = FALSE, debug = debug)
 
   }#THEN
   else if (method == "si.hiton.pc") {
 
     nbr = si.hiton.pc.heuristic(target, data = x, nodes = nodes, alpha = alpha,
-            B = B, whitelist = whitelist, blacklist = blacklist, test = test,
+            test.args = test.args, whitelist = whitelist, blacklist = blacklist, test = test,
             optimized = optimized, debug = debug) 
 
     # this is the backward phase.
     nbr = neighbour(target, mb = structure(list(nbr), names = target), data = x, 
-                    alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                    alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
                     test = test, markov = FALSE, debug = debug)
 
   }#ELSE
@@ -772,7 +777,7 @@ nbr.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
     pc.method = check.hpc.internal(extra.args$pc.method)
 
     nbr = hybrid.pc(t=target, data = x, nodes = nodes, pc.method = pc.method,
-                    alpha = alpha, B = B, whitelist = whitelist, blacklist = NULL,
+                    alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = NULL,
                     backtracking = NULL, test = test, debug = debug)
 
   }#ELSE

@@ -8,7 +8,7 @@ ci.test = function(x, ...) {
 
 # do a single conditional independence test (nodes as character strings).
 ci.test.character = function(x, y = NULL, z = NULL, data, test = NULL,
-    B = NULL, debug = FALSE, ...) {
+    test.args = NULL, debug = FALSE, ...) {
 
   # the original data set is needed.
   check.data(data)
@@ -31,29 +31,29 @@ ci.test.character = function(x, y = NULL, z = NULL, data, test = NULL,
   }#THEN
   # check the test label.
   test = check.test(test, data)
-  # check B (the number of bootstrap/permutation samples).
-  B = check.B(B, test)
+  # check the test parameters.
+  test.args = check.test.args(test.args, test)
   # warn about unused arguments.
   check.unused.args(list(...), character(0))
 
   # compute the network score.
   conditional.test(x = x, y = y, sx = z, data = data, test = test,
-    B = B, alpha = 1, learning = FALSE)
+    test.args = test.args, alpha = 1, learning = FALSE)
 
 }#CI.TEST.CHARACTER
 
 # do a single conditional independence test (nodes in a matrix).
-ci.test.matrix = function(x, test = NULL, B = NULL, debug = FALSE, ...) {
+ci.test.matrix = function(x, test = NULL, test.args = NULL, debug = FALSE, ...) {
 
   if (ncol(x) < 2)
     stop("'x' must have at least two columns.")
 
-  ci.test(x = as.data.frame(x), test = test, B = B, debug = debug, ...)
+  ci.test(x = as.data.frame(x), test = test, test.args = test.args, debug = debug, ...)
 
 }#CI.TEST.MATRIX
 
 # do a single conditional independence test (nodes in a data frame).
-ci.test.data.frame = function(x, test = NULL, B = NULL, debug = FALSE, ...) {
+ci.test.data.frame = function(x, test = NULL, test.args = NULL, debug = FALSE, ...) {
 
   if (ncol(x) < 2)
     stop("'x' must have at least two columns.")
@@ -64,12 +64,12 @@ ci.test.data.frame = function(x, test = NULL, B = NULL, debug = FALSE, ...) {
   check.unused.args(list(...), character(0))
 
   ci.test.character(x = nodes[1], y = nodes[2], z = nodes[-(1:2)],
-    data = x, test = test, B = B, debug = debug)
+    data = x, test = test, test.args = test.args, debug = debug)
 
 }#CI.TEST.DATA.FRAME
 
 # do a single conditional independence test (numerical vectors).
-ci.test.numeric = function(x, y = NULL, z = NULL, test = NULL, B = NULL, debug = FALSE, ...) {
+ci.test.numeric = function(x, y = NULL, z = NULL, test = NULL, test.args = NULL, debug = FALSE, ...) {
 
   # check debug.
   check.logical(debug)
@@ -117,13 +117,13 @@ ci.test.numeric = function(x, y = NULL, z = NULL, test = NULL, B = NULL, debug =
   check.data(data)
   # check the test label.
   test = check.test(test, data)
-  # check B (the number of bootstrap/permutation samples).
-  B = check.B(B, test)
+  # check the test parameters.
+  test.args = check.test.args(test.args, test)
   # warn about unused arguments.
   check.unused.args(list(...), character(0))
 
   res = conditional.test(x = 1L, y = 2L, sx = sx, data = data,
-    test = test, B = B, alpha = 1, learning = FALSE)
+    test = test, test.args = test.args, alpha = 1, learning = FALSE)
 
   # rewrite the test formula.
   res$data.name = paste(deparse(substitute(x)), "~", deparse(substitute(y)),
@@ -135,7 +135,7 @@ ci.test.numeric = function(x, y = NULL, z = NULL, test = NULL, B = NULL, debug =
 }#CI.TEST.NUMERIC
 
 # do a single conditional independence test (factor objects).
-ci.test.factor = function(x, y = NULL, z = NULL, test = NULL, B = NULL,
+ci.test.factor = function(x, y = NULL, z = NULL, test = NULL, test.args = NULL,
     debug = FALSE, ...) {
 
   # check debug.
@@ -184,13 +184,13 @@ ci.test.factor = function(x, y = NULL, z = NULL, test = NULL, B = NULL,
   check.data(data)
   # check the test label.
   test = check.test(test, data)
-  # check B (the number of bootstrap/permutation samples).
-  B = check.B(B, test)
+  # check the test parameters.
+  test.args = check.test.args(test.args, test)
   # warn about unused arguments.
   check.unused.args(list(...), character(0))
 
   res = conditional.test(x = 1L, y = 2L, sx = as.integer(sx), data = data,
-    test = test, B = B, alpha = 1, learning = FALSE)
+    test = test, test.args = test.args, alpha = 1, learning = FALSE)
 
   # rewrite the test formula.
   res$data.name = paste(deparse(substitute(x)), "~", deparse(substitute(y)),

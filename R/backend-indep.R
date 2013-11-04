@@ -1,7 +1,7 @@
 
 # second prinple of CI algorithms: infer arc orientation from graph structure.
 second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
-    test, alpha, B = NULL, data, strict, debug = FALSE) {
+    test, alpha, test.args = NULL, data, strict, debug = FALSE) {
 
   nodes = names(x)
 
@@ -17,7 +17,7 @@ second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
   # 3.1 detect v-structures.
   vs = do.call("rbind",
          vstruct.detect(nodes = nodes, arcs = arcs, mb = mb, data = x,
-           alpha = alpha, B = B, test = test, debug = debug))
+           alpha = alpha, test.args = test.args, test = test, debug = debug))
   rownames(vs) = NULL
 
   if (!is.null(vs)) {
@@ -45,8 +45,13 @@ second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
 
   # include also the number of permutations/bootstrap samples
   # if it makes sense.
-  if (!is.null(B))
-    learning$args$B = B
+  if (!is.null(test.args) && !is.null(test.args$B))
+    learning$args$B = test.args$B
+
+  # include also the power rule threshold
+  # if it makes sense.
+  if (!is.null(test.args) && !is.null(test.args$power.rule))
+    learning$args$power.rule = test.args$power.rule
 
   list(learning = learning, nodes = cache.structure(nodes, arcs = arcs),
     arcs = arcs)
@@ -54,7 +59,7 @@ second.principle = function(x, cluster = NULL, mb, whitelist, blacklist,
 }#SECOND.PRINCIPLE
 
 # build the neighbourhood of a node from the markov blanket.
-neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
+neighbour = function(x, mb, data, alpha, test.args = NULL, whitelist, blacklist,
   backtracking = NULL, test, empty.dsep = TRUE, markov = TRUE, debug = FALSE) {
 
   # save a pristine copy of the markov blanket.
@@ -152,7 +157,7 @@ neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
           cat("    > trying conditioning subset '", dsep.subsets[s,], "'.\n")
 
         a = conditional.test(x, y, dsep.subsets[s,], data = data,
-              test = test, B = B, alpha = alpha)
+              test = test, test.args = test.args, alpha = alpha)
         if (a > alpha) {
 
           if (debug)
@@ -199,7 +204,7 @@ neighbour = function(x, mb, data, alpha, B = NULL, whitelist, blacklist,
 }#NEIGHBOUR
 
 # detect v-structures in the graph.
-vstruct.detect = function(nodes, arcs, mb, data, alpha, B = NULL, test,
+vstruct.detect = function(nodes, arcs, mb, data, alpha, test.args = NULL, test,
     debug = FALSE) {
 
   vstruct.centered.on = function(x, mb, data) {
@@ -255,7 +260,7 @@ vstruct.detect = function(nodes, arcs, mb, data, alpha, B = NULL, test,
           for (s in 1:nrow(dsep.subsets)) {
 
             a = conditional.test(y, z, c(dsep.subsets[s,], x), data = data,
-                  test = test, B = B, alpha = alpha)
+                  test = test, test.args = test.args, alpha = alpha)
             if (debug)
               cat("    > testing", y, "vs", z, "given", c(dsep.subsets[s,], x), "(", a, ")\n")
             max_a = max(a, max_a)

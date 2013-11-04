@@ -105,14 +105,14 @@ choose.direction = function(x, arc, data, criterion = NULL, ..., debug = FALSE) 
     # sanitize the alpha threshold.
     alpha = check.alpha(list(...)$alpha, network = x)
 
-    # sanitize B (the number of bootstrap/permutation samples).
-    B = check.B(list(...)$B, criterion)
+    # sanitize test parameters.
+    test.args = check.test.args(list(...)$test.args, criterion)
 
     # warn about unused arguments.
-    check.unused.args(list(...), c("alpha", "B"))
+    check.unused.args(list(...), c("alpha", "test.args"))
 
     x = choose.direction.test(x, data = data, arc = arc, test = criterion,
-          alpha = alpha, B = B, debug = debug)
+          alpha = alpha, test.args = test.args, debug = debug)
 
   }#THEN
   else if (criterion %in% available.scores) {

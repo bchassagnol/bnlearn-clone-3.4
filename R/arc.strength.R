@@ -1,6 +1,6 @@
 
 # compute arcs' strength as the p-value of the test for their removal.
-arc.strength.test = function(network, data, test, alpha, B, debug = FALSE) {
+arc.strength.test = function(network, data, test, alpha, test.args, debug = FALSE) {
 
   drop = function(arc) {
 
@@ -15,7 +15,7 @@ arc.strength.test = function(network, data, test, alpha, B, debug = FALSE) {
       network$nodes[[arc[2]]]$parents[network$nodes[[arc[2]]]$parents != arc[1]]
 
     a = conditional.test(arc[1], arc[2], parents, data = data, test = test,
-          B = B, alpha = alpha)
+          test.args = test.args, alpha = alpha)
 
     if (debug) {
 

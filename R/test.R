@@ -1,5 +1,5 @@
 
-conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE, debug = FALSE) {
+conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning = TRUE, debug = FALSE) {
 
   if (debug)
     cat("  > testing independence (", x ,",", y, "|", sx, ") :")
@@ -13,11 +13,45 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
   df = NULL
   perm.counter = NULL
 
+  # recover optional parameters
+  B = test.args$B
+  power.rule = test.args$power.rule
+
+  # build contingency tables if needed
   if (length(sx) == 0) {
 
     # all unconditional tests need this subsetting, do it here.
     datax = minimal.data.frame.column(data, x)
     datay = minimal.data.frame.column(data, y)
+    config = factor(1)
+
+  }#THEN
+  else {
+
+    # all discrete conditional tests need this subsetting, do it here.
+    if (test %in% c(available.discrete.tests, available.ordinal.tests)) {
+      datax = minimal.data.frame.column(data, x)
+      datay = minimal.data.frame.column(data, y)
+      if (length(sx) == 1)
+        # if there is only one parent, get it easy.
+        config = minimal.data.frame.column(data, sx)
+      else
+        config = configurations(minimal.data.frame.column(data, sx))
+    }#THEN
+
+  }#ELSE
+
+  # early stop if the power rule does not comply (discrete tests only)
+  if (!is.null(power.rule)
+      && test %in% c(available.discrete.tests, available.ordinal.tests)
+      && ndata < power.rule * nlevels(datax) * nlevels(datay) * nlevels(config)) {
+
+    statistic = Inf
+    df = NA
+    p.value = 1
+
+  }#THEN
+  else if (length(sx) == 0) {
 
     # Mutual Infomation (chi-square asymptotic distribution)
     if (test == "mi") {
@@ -175,22 +209,8 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
   }#THEN
   else {
 
-    # build the contingency table only for discrete data.
-    if (test %in% c(available.discrete.tests, available.ordinal.tests)) {
-
-      # if there is only one parent, get it easy.
-      if (length(sx) == 1)
-        config = minimal.data.frame.column(data, sx)
-      else
-        config = configurations(minimal.data.frame.column(data, sx))
-
-    }#THEN
-
     # Conditional Mutual Infomation (chi-square asymptotic distribution)
     if (test == "mi") {
-
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
 
       par.test = cmi.test(datax, datay, config, ndata, gsquare = TRUE)
       statistic = par.test[1]
@@ -201,9 +221,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     # Shrinked Conditional Mutual Infomation (chi-square asymptotic distribution)
     else if (test == "mi-sh") {
 
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
-
       par.test = shcmi.test(datax, datay, config, gsquare = TRUE)
       statistic = par.test[1]
       df = par.test[2]
@@ -213,9 +230,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     # Pearson's X^2 test (chi-square asymptotic distribution)
     else if (test == "x2") {
 
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
-
       par.test = cx2.test(datax, datay, config)
       statistic = par.test[1]
       df = par.test[2]
@@ -224,9 +238,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     }#THEN
     # Jonckheere-Terpstra Test (asymptotic normal distribution)
     else if (test == "jt") {
-
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
 
       statistic = cjt(datax, datay, config)
       p.value = 2 * pnorm(abs(statistic), lower.tail = FALSE)
@@ -276,9 +287,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     # Mutual Infomation (monte carlo permutation distribution)
     else if ((test == "mc-mi") || (test == "smc-mi")) {
 
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
-
       perm.test = cmc.test(datax, datay, config, samples = B,
                     alpha = ifelse(test == "smc-mi", alpha, 1), test = 1L)
       statistic = perm.test[1]
@@ -287,9 +295,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     }#THEN
     # Mutual Infomation (semiparametric)
     else if (test == "sp-mi") {
-
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
 
       perm.test = cmc.test(datax, datay, config, samples = B,
                     alpha = 1, test = 6L)
@@ -301,9 +306,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     # Pearson's X^2 test (monte carlo permutation distribution)
     else if ((test == "mc-x2") || (test == "smc-x2")) {
 
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
-
       perm.test = cmc.test(datax, datay, config, samples = B,
                     alpha = ifelse(test == "smc-x2", alpha, 1), test = 2L)
       statistic = perm.test[1]
@@ -312,9 +314,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     }#THEN
     # Pearson's X^2 test (semiparametric)
     else if (test == "sp-x2") {
-
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
 
       perm.test = cmc.test(datax, datay, config, samples = B,
                     alpha = 1, test = 7L)
@@ -353,9 +352,6 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     }#THEN
     # Jonckheere-Terpstra test (monte carlo permutation distribution)
     else if ((test == "mc-jt") || (test == "smc-jt")) {
-
-      datax = minimal.data.frame.column(data, x)
-      datay = minimal.data.frame.column(data, y)
 
       perm.test = cmc.test(datax, datay, config, samples = B,
                     alpha = ifelse(test == "smc-jt", alpha, 1), test = 8L)
@@ -399,6 +395,9 @@ conditional.test = function(x, y, sx, data, test, B, alpha = 1, learning = TRUE,
     # number of permutations.
     if (!is.null(B))
       result$parameter[["Monte Carlo samples"]] = B
+    # power rule average threshold.
+    if (!is.null(power.rule))
+      result$parameter[["Power Rule threshold"]] = power.rule
 
     return(result)
 

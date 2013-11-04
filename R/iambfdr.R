@@ -1,12 +1,12 @@
 
 iambfdr.global = function(x, whitelist, blacklist, test, alpha,
-                          B, strict, debug = FALSE) {
+                          test.args, strict, debug = FALSE) {
 
   nodes = names(x)
 
   # 1. [Compute Markov Blankets]
   mb = lapply(as.list(nodes), iambfdr, data = x, nodes = nodes,
-              alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+              alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
               test = test, debug = debug)
   names(mb) = nodes
 
@@ -15,7 +15,7 @@ iambfdr.global = function(x, whitelist, blacklist, test, alpha,
 
   # 2. [Compute Graph Structure]
   mb = lapply(as.list(nodes), neighbour, mb = mb, data = x, alpha = alpha,
-              B = B, whitelist = whitelist, blacklist = blacklist, test = test,
+              test.args = test.args, whitelist = whitelist, blacklist = blacklist, test = test,
               debug = debug)
   names(mb) = nodes
 
@@ -27,7 +27,7 @@ iambfdr.global = function(x, whitelist, blacklist, test, alpha,
 }#IAMBFDR.GLOBAL
 
 iambfdr.global.optimized = function(x, whitelist, blacklist,
-                                    test, alpha, B, strict, debug = FALSE) {
+                                    test, alpha, test.args, strict, debug = FALSE) {
 
   nodes = names(x)
   mb2 = mb = list()
@@ -38,7 +38,7 @@ iambfdr.global.optimized = function(x, whitelist, blacklist,
     backtracking = unlist(sapply(mb, function(x){ node %in% x  }))
 
     mb[[node]] = iambfdr(
-      node, data = x, nodes = nodes, alpha = alpha, B = B,
+      node, data = x, nodes = nodes, alpha = alpha, test.args = test.args,
       whitelist = whitelist, blacklist = blacklist,
       backtracking = backtracking, test = test, debug = debug)
 
@@ -54,7 +54,7 @@ iambfdr.global.optimized = function(x, whitelist, blacklist,
 
     # save results in a copy of mb.
     mb2[[node]] = neighbour(
-      node, mb = mb, data = x, alpha = alpha, B = B,
+      node, mb = mb, data = x, alpha = alpha, test.args = test.args,
       whitelist = whitelist, blacklist = blacklist,
       backtracking = backtracking, test = test, debug = debug)
 
@@ -71,13 +71,13 @@ iambfdr.global.optimized = function(x, whitelist, blacklist,
 }#IAMBFDR.GLOBAL.OPTIMIZED
 
 iambfdr.global.cluster = function(x, cluster, whitelist,
-                                  blacklist, test, alpha, B, strict, debug = FALSE) {
+                                  blacklist, test, alpha, test.args, strict, debug = FALSE) {
 
   nodes = names(x)
 
   # 1. [Compute Markov Blankets]
   mb = parLapply(cluster, as.list(nodes), iambfdr, data = x,
-                 nodes = nodes, alpha = alpha, B = B, whitelist = whitelist,
+                 nodes = nodes, alpha = alpha, test.args = test.args, whitelist = whitelist,
                  blacklist = blacklist, test = test, debug = debug)
   names(mb) = nodes
 
@@ -86,7 +86,7 @@ iambfdr.global.cluster = function(x, cluster, whitelist,
 
   # 2. [Compute Graph Structure]
   mb = parLapply(cluster, as.list(nodes), neighbour, mb = mb, data = x,
-                 alpha = alpha, B = B, whitelist = whitelist,
+                 alpha = alpha, test.args = test.args, whitelist = whitelist,
                  blacklist = blacklist, test = test, debug = debug)
   names(mb) = nodes
 
@@ -97,7 +97,7 @@ iambfdr.global.cluster = function(x, cluster, whitelist,
 
 }#IAMBFDR.GLOBAL.CLUSTER
 
-iambfdr = function(x, data, nodes, alpha, B, whitelist, blacklist,
+iambfdr = function(x, data, nodes, alpha, test.args, whitelist, blacklist,
                    start = character(0), backtracking = NULL, test, debug = FALSE) {
 
   whitelisted = nodes[sapply(
@@ -165,7 +165,7 @@ iambfdr = function(x, data, nodes, alpha, B, whitelist, blacklist,
     # get an association measure for each of the available nodes.
     association = sapply(nodes, function(node) {
       conditional.test(x, node, sx = setdiff(mb, node), test = test,
-                       data = data, B = B, alpha = alpha)})
+                       data = data, test.args = test.args, alpha = alpha)})
 
     pvalues.order = order(association)
     association = association[pvalues.order]

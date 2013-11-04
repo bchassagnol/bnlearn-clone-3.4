@@ -64,7 +64,7 @@ discretize = function(x, method, breaks = 3, ..., debug = FALSE) {
 }#DISCRETIZE
 
 # Pena's relevant nodes feature selection.
-relevant = function(target, context, data, test, alpha, B, debug = FALSE) {
+relevant = function(target, context, data, test, alpha, test.args, debug = FALSE) {
 
   # check the data.
   check.data(data)
@@ -86,14 +86,14 @@ relevant = function(target, context, data, test, alpha, B, debug = FALSE) {
   }#ELSE
   # check the test label.
   test = check.test(test, data)
-  # check B (the number of eprmutations).
-  B = check.B(B, test)  
+  # check test parameters.
+  test.args = check.test.args(test.args, test)  
   # check alpha.
   alpha = check.alpha(alpha)
   # check debug.
   check.logical(debug)
 
   pena.backend(target = target, context = context, data = data, test = test,
-    alpha = alpha, debug = debug)
+    alpha = alpha, test.args = test.args, debug = debug)
 
 }#RELEVANT

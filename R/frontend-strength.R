@@ -46,14 +46,14 @@ arc.strength = function(x, data, criterion = NULL, ..., debug = FALSE) {
     # sanitize the alpha threshold.
     alpha = check.alpha(list(...)$alpha, network = x)
 
-    # sanitize B (the number of bootstrap/permutation samples).
-    B = check.B(list(...)$B, criterion)
+    # sanitize test parameters.
+    test.args = check.test.args(list(...)$test.args, criterion)
 
     # warn about unused arguments.
-    check.unused.args(list(...), c("alpha", "B"))
+    check.unused.args(list(...), c("alpha", "test.args"))
 
     res = arc.strength.test(network = x, data = data, alpha = alpha,
-            test = criterion, B = B, debug = debug)
+            test = criterion, test.args = test.args, debug = debug)
 
     # add extra information for strength.plot().
     res = structure(res, mode = "test", threshold = alpha)

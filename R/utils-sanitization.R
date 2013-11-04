@@ -1243,42 +1243,6 @@ check.alpha = function(alpha, network = NULL) {
 
 }#CHECK.ALPHA
 
-# check the number of permutation/boostrap samples.
-check.B = function(B, criterion) {
-
-  if (criterion %in% resampling.tests) {
-
-    if (!missing(B) && !is.null(B)) {
-
-      if (!is.positive.integer(B))
-        stop("the number of permutations/bootstrap replications must be a positive integer number.")
-
-      B = as.integer(B)
-
-    }#THEN
-    else {
-
-      if (criterion %in% semiparametric.tests)
-        B = 100L
-      else
-        B = 5000L
-
-    }#ELSE
-
-  }#THEN
-  else {
-
-    if (!missing(B) && !is.null(B))
-      warning("this test does not require any permutations/bootstrap resampling, ignoring B.\n")
-
-    B = NULL
-
-  }#ELSE
-
-  return(B)
-
-}#CHECK.B
-
 check.amat = function(amat, nodes) {
 
   # a node is needed.
@@ -1791,10 +1755,19 @@ check.learning.algorithm.args = function(args, algorithm, bn) {
 
         if (!("alpha" %in% names(args)))
           args$alpha = bn$learning$args$alpha
+        
+        if ("test" %in% names(args)) {
 
-        if ("test" %in% names(args) && !("B" %in% names(args)))
-          if (args$test %in% resampling.tests)
-            args$B = bn$learning$args$B
+          if (!("test.args" %in% names(args)))
+            args$test.args = list()
+
+          if (args$test %in% resampling.tests && !("B" %in% names(args$test.args)))
+            args$test.args$B = bn$learning$args$B
+
+          if (args$test %in% available.discrete.tests && !("power.rule" %in% names(args$test.args)))
+            args$test.args$power.rule = bn$learning$args$power.rule
+
+        }#THEN
 
       }#THEN
 
@@ -2222,3 +2195,70 @@ check.hpc.internal = function(pc.method, default = "fdr.iamb") {
   return(pc.method)
 
 }#CHECK.HPC.PC.METHOD
+
+check.test.args = function(test.args, test) {
+
+  if (missing(test.args) || is.null(test.args))
+    test.args = list()
+
+  checked.args = character(0)
+
+  # check the number of permutation/boostrap samples.
+  checked.args = c(checked.args, "B")
+  if (test %in% resampling.tests) {
+
+    B = test.args$B
+    if (!is.null(B)) {
+
+      if (!is.positive.integer(B))
+        stop("the number of permutations/bootstrap replications must be a positive integer number.")
+      B = as.integer(B)
+
+    }#THEN
+    else {
+
+      if (test %in% semiparametric.tests)
+        B = 100L
+      else
+        B = 5000L
+
+    }#ELSE
+    test.args$B = B
+
+  }#THEN
+  else {
+
+    if ("B" %in% names(test.args))
+      warning("this test does not require any permutations/bootstrap resampling, ignoring B.")
+    test.args$B = NULL
+
+  }#ELSE
+
+  # check the power rule threshold.
+  checked.args = c(checked.args, "power.rule")
+  if (test %in% c(available.discrete.tests, available.ordinal.tests)) {
+
+    pwr = test.args$power.rule
+    if (!is.null(pwr)) {
+
+      if (!is.positive.integer(pwr))
+        stop("the minimum average sample per count (power rule) must be a non-negative integer number.")
+      test.args$power.rule = as.integer(pwr)
+
+    }#THEN
+
+  }#THEN
+  else {
+
+    if ("power.rule" %in% names(test.args))
+      warning("the power rule heuristic does not apply to this test, ignoring power.rule.")
+    test.args$power.rule = NULL
+
+  }#ELSE
+
+  check.unused.args(test.args, checked.args)
+  test.args[!names(test.args) %in% checked.args] = NULL
+
+  return(test.args)
+
+}#CHECK.TEST.ARGS

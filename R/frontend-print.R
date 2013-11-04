@@ -81,6 +81,8 @@ print.bn = function(x, ...) {
       wcat("  alpha threshold:                      ", format(x$learning$args$alpha))
     if ("B" %in% params)
       wcat("  permutations/bootstrap samples::      ", format(x$learning$args$B))
+    if ("power.rule" %in% params)
+      wcat("  power rule minimum threshold:         ", format(x$learning$args$power.rule))
     if ("iss" %in% params)
       wcat("  imaginary sample size:                ", format(x$learning$args$iss))
     if ("phi" %in% params)

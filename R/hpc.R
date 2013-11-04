@@ -1,12 +1,12 @@
 
 hybrid.pc.global = function(
-  data, whitelist, blacklist, test, alpha, B, strict, pc.method, nbr.join,
+  data, whitelist, blacklist, test, alpha, test.args, strict, pc.method, nbr.join,
   debug=FALSE) {
 
   nodes = names(data)
 
   mb = lapply(as.list(nodes), hybrid.pc, data = data, nodes = nodes,
-              alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+              alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
               test = test, debug = debug, pc.method = pc.method)
   names(mb) = nodes
 
@@ -19,7 +19,7 @@ hybrid.pc.global = function(
 }#HYBRID.PC.GLOBAL
 
 hybrid.pc.global.optimized = function(
-  data, whitelist, blacklist, test, alpha, B, strict, pc.method, nbr.join,
+  data, whitelist, blacklist, test, alpha, test.args, strict, pc.method, nbr.join,
   debug=FALSE) {
 
   nodes = names(data)
@@ -43,7 +43,7 @@ hybrid.pc.global.optimized = function(
     }#THEN
 
     mb[[node]] = hybrid.pc(node, data = data, nodes = nodes, alpha = alpha,
-                           B = B, whitelist = whitelist, blacklist = blacklist,
+                           test.args = test.args, whitelist = whitelist, blacklist = blacklist,
                            backtracking = backtracking, test = test,
                            debug = debug, pc.method = pc.method)
 
@@ -58,13 +58,13 @@ hybrid.pc.global.optimized = function(
 }#HYBRID.PC.GLOBAL.OPTIMIZED
 
 hybrid.pc.global.cluster = function(
-  data, cluster, whitelist, blacklist, test, alpha, B, strict, pc.method,
+  data, cluster, whitelist, blacklist, test, alpha, test.args, strict, pc.method,
   nbr.join, debug=FALSE) {
 
   nodes = names(data)
 
   mb = clusterApplyLB(cluster, as.list(nodes), hybrid.pc, data = data,
-                      nodes = nodes, alpha = alpha, B = B, whitelist = whitelist,
+                      nodes = nodes, alpha = alpha, test.args = test.args, whitelist = whitelist,
                       blacklist = blacklist, test = test, debug = debug, pc.method = pc.method)
   names(mb) = nodes
 
@@ -77,10 +77,10 @@ hybrid.pc.global.cluster = function(
 }#HYBRID.PC.GLOBAL.CLUSTER
 
 hybrid.pc = function(t, data, nodes, whitelist, blacklist, test, alpha,
-                     B, pc.method, backtracking = NULL, debug = FALSE) {
+                     test.args, pc.method, backtracking = NULL, debug = FALSE) {
 
   # 1. [PCS] Search parents and children superset
-  tmp = hybrid.pc.de.pcs(t, data, nodes, alpha, B, whitelist, blacklist,
+  tmp = hybrid.pc.de.pcs(t, data, nodes, alpha, test.args, whitelist, blacklist,
                          backtracking, test, debug)
   pcs = tmp$pcs
   pvals = tmp$pvals
@@ -91,7 +91,7 @@ hybrid.pc = function(t, data, nodes, whitelist, blacklist, test, alpha,
     return(list(nbr = pcs, mb = NULL))
 
   # 2. [RSPS] Search remaining spouses superset, those not already in PCS
-  rsps = hybrid.pc.de.rsps(t, data, nodes, pcs, dsep, alpha, B, test, debug)
+  rsps = hybrid.pc.de.rsps(t, data, nodes, pcs, dsep, alpha, test.args, test, debug)
 
   #optimisation : 2 nodes in PC and no SP --> PC == PCS
   if(length(c(pcs, rsps)) < 3)
@@ -102,7 +102,7 @@ hybrid.pc = function(t, data, nodes, whitelist, blacklist, test, alpha,
 
   # 3. [PC] Get the Parents and Children from nodes within PCS and RSPS
   pc = hybrid.pc.nbr.search(t = t, data = data, nodes = c(t, pcs, rsps),
-                            test = test, alpha = alpha, B = B, whitelist = whitelist,
+                            test = test, alpha = alpha, test.args = test.args, whitelist = whitelist,
                             blacklist = blacklist, start = start, backtracking = backtracking,
                             debug = debug, method = pc.method)
 
@@ -111,7 +111,7 @@ hybrid.pc = function(t, data, nodes, whitelist, blacklist, test, alpha,
   for (node in pcs[!pcs %in% pc]) {
 
     pcn = hybrid.pc.nbr.search(t = node, data = data, nodes = c(t, pcs, rsps),
-                               test = test, alpha = alpha, B = B, whitelist = whitelist,
+                               test = test, alpha = alpha, test.args = test.args, whitelist = whitelist,
                                blacklist = blacklist, backtracking = NULL,
                                debug = debug, method = pc.method, looking.for = t)
 
@@ -138,49 +138,49 @@ hybrid.pc = function(t, data, nodes, whitelist, blacklist, test, alpha,
 
 }#HYBRID.PC
 
-hybrid.pc.nbr.search = function(t, data, nodes, test, alpha, B,
+hybrid.pc.nbr.search = function(t, data, nodes, test, alpha, test.args,
                                 whitelist = NULL, blacklist = NULL, backtracking = NULL, debug = FALSE,
                                 start = character(0), method, looking.for = NULL) {
 
   if (method == "si.hiton.pc") {
 
     mb = si.hiton.pc.heuristic(x=t, data = data, nodes = nodes, alpha = alpha,
-                               B = B, whitelist = whitelist, blacklist = blacklist, test = test,
+                               test.args = test.args, whitelist = whitelist, blacklist = blacklist, test = test,
                                optimized = optimized, debug = debug)
 
   }#THEN
   else if (method == "gs") {
 
     mb = gs.markov.blanket(x = t, data = data, nodes = nodes,
-                           alpha = alpha, B = B, whitelist = whitelist, blacklist = NULL,
+                           alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = NULL,
                            backtracking = NULL, test = test, debug = debug)
 
   }#THEN
   else if (method == "inter.iamb") {
 
     mb = inter.ia.markov.blanket(x = t, data = data, nodes = nodes,
-                                 alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                                 alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
                                  start = start, backtracking = backtracking, test = test, debug = debug)
 
   }#THEN
   else if (method == "iamb") {
 
     mb = ia.markov.blanket(x = t, data = data, nodes = nodes,
-                           alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                           alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
                            start = start, backtracking = backtracking, test = test, debug = debug)
 
   }#THEN
   else if (method == "fast.iamb") {
 
     mb = fast.ia.markov.blanket(x = t, data = data, nodes = nodes,
-                                alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                                alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
                                 start = start, backtracking = backtracking, test = test, debug = debug)
 
   }#THEN
   else if (method == "fdr.iamb") {
 
     mb = iambfdr(x = t, data = data, nodes = nodes,
-                 alpha = alpha, B = B, whitelist = whitelist, blacklist = blacklist,
+                 alpha = alpha, test.args = test.args, whitelist = whitelist, blacklist = blacklist,
                  start = start, backtracking = backtracking, test = test, debug = debug)
 
   }#THEN
@@ -195,7 +195,7 @@ hybrid.pc.nbr.search = function(t, data, nodes, test, alpha, B,
     return(NULL)
 
   if (method %in% markov.blanket.algorithms)
-    pc = hybrid.pc.filter(t, pcs = mb, rsps = NULL, data, alpha, B, whitelist,
+    pc = hybrid.pc.filter(t, pcs = mb, rsps = NULL, data, alpha, test.args, whitelist,
                           blacklist, backtracking, test, debug)
   else
     pc = mb
@@ -204,7 +204,7 @@ hybrid.pc.nbr.search = function(t, data, nodes, test, alpha, B,
 
 }#HYBRID.PC.NBR.SEARCH
 
-hybrid.pc.de.pcs = function(t, data, nodes, alpha, B, whitelist, blacklist,
+hybrid.pc.de.pcs = function(t, data, nodes, alpha, test.args, whitelist, blacklist,
                             backtracking = NULL, test, debug = FALSE) {
 
   pcs = vector()
@@ -245,7 +245,7 @@ hybrid.pc.de.pcs = function(t, data, nodes, alpha, B, whitelist, blacklist,
   # Phase (I): remove X if Ind(T,X) (0-degree d-separated nodes)
   for (x in nodes.to.check) {
 
-    a = conditional.test(t, x, c(), data = data, test = test, B = B,
+    a = conditional.test(t, x, c(), data = data, test = test, test.args = test.args,
                          alpha = alpha, debug = debug)
 
     if (a <= alpha) {
@@ -291,7 +291,7 @@ hybrid.pc.de.pcs = function(t, data, nodes, alpha, B, whitelist, blacklist,
 
       #     for (y in setdiff(nodes.to.check.against, x)) {
 
-      a = conditional.test(t, x, y, data = data, test = test, B = B,
+      a = conditional.test(t, x, y, data = data, test = test, test.args = test.args,
                            alpha = alpha, debug = debug)
 
       x.ind = which(pcs == x)
@@ -326,7 +326,7 @@ hybrid.pc.de.pcs = function(t, data, nodes, alpha, B, whitelist, blacklist,
 
 }#HYBRID.PC.DE.PCS
 
-hybrid.pc.de.rsps = function(t, data, nodes, pcs, dsep, alpha, B, test,
+hybrid.pc.de.rsps = function(t, data, nodes, pcs, dsep, alpha, test.args, test,
                              debug = FALSE) {
 
   rsps = vector()
@@ -354,7 +354,7 @@ hybrid.pc.de.rsps = function(t, data, nodes, pcs, dsep, alpha, B, test,
         next
 
       a = conditional.test(t, y, c(dsep[[y]], x), data = data, test = test,
-                           B = B, alpha = alpha, debug = debug)
+                           test.args = test.args, alpha = alpha, debug = debug)
 
       if (a <= alpha) {
 
@@ -379,7 +379,7 @@ hybrid.pc.de.rsps = function(t, data, nodes, pcs, dsep, alpha, B, test,
     for (y in rspsx) {
       for (z in rspsx[rspsx != y]) {
 
-        a = conditional.test(t, y, c(x, z), data = data, test = test, B = B,
+        a = conditional.test(t, y, c(x, z), data = data, test = test, test.args = test.args,
                              alpha = alpha, debug = debug)
 
         if (a > alpha) {
@@ -414,7 +414,7 @@ hybrid.pc.de.rsps = function(t, data, nodes, pcs, dsep, alpha, B, test,
 # Build the parents and children (PC) set of a node from it's parents and
 # children superset (PCS) and it's remaining spouses superset (RSPS).
 # we assume intersection(t, pcs, rsps) is empty
-hybrid.pc.filter = function(t, pcs, rsps, data, alpha, B = NULL,
+hybrid.pc.filter = function(t, pcs, rsps, data, alpha, test.args,
                             whitelist, blacklist, backtracking = NULL, test, debug = FALSE) {
 
   nodes = names(data)
@@ -476,7 +476,7 @@ hybrid.pc.filter = function(t, pcs, rsps, data, alpha, B = NULL,
         for (s in 1:nrow(dsep.subsets)) {
 
           a = conditional.test(t, x, dsep.subsets[s,], data = data, test = test,
-                               B = B, alpha = alpha, debug = debug)
+                               test.args = test.args, alpha = alpha, debug = debug)
 
           if (a > alpha) {
 
