@@ -2,6 +2,100 @@
 #include <R_ext/Arith.h>
 #include <R_ext/Utils.h>
 
+int * table_2d(int *xx, int lx, int *yy, int ly, int num) {
+
+  int i, xi, yi;
+  int *n;
+  
+  n = (int*) R_alloc((lx + 1) * (ly + 1), sizeof(int));
+
+  for (yi=0; yi<=ly; yi++)
+    for (xi=0; xi<=lx; xi++)
+      n[xi + yi*(lx+1)] = 0;
+
+  /* compute the joint and marginal frequencies of x and y. */
+  for (i=0; i<num; i++) {
+    xi = xx[i]-1;
+    yi = yy[i]-1;
+    n[xi + yi*(lx+1)]++; /*xy*/
+    n[xi + ly*(lx+1)]++; /*x*/
+    n[lx + yi*(lx+1)]++; /*y*/
+  }/*FOR*/
+
+  n[lx + ly*(lx+1)] = num; /*total marginal*/
+
+  return n;
+
+}/*TABLE_2D*/
+
+int * table_3d(int *xx, int lx, int *yy, int ly, int *zz, int lz, int num) {
+
+  int i, xi, yi, zi;
+  int *n;
+
+  n = (int*) R_alloc((lx + 1) * (ly + 1) * (lz + 1), sizeof(int));
+
+  for (zi=0; zi<=lz; zi++)
+    for (yi=0; yi<=ly; yi++)
+      for (xi=0; xi<=lx; xi++)
+        n[xi + yi*(lx+1) + zi*(ly+1)*(lx+1)] = 0;
+
+  /* compute the joint and marginal frequencies of x, y and z. */
+  for (i=0; i<num; i++) {
+    xi = xx[i]-1;
+    yi = yy[i]-1;
+    zi = zz[i]-1;
+    n[xi + yi*(lx+1) + zi*(ly+1)*(lx+1)]++; /*xyz*/
+    n[xi + yi*(lx+1) + lz*(ly+1)*(lx+1)]++; /*xy*/
+    n[lx + yi*(lx+1) + zi*(ly+1)*(lx+1)]++; /*yz*/
+    n[xi + ly*(lx+1) + zi*(ly+1)*(lx+1)]++; /*zx*/
+    n[xi + ly*(lx+1) + lz*(ly+1)*(lx+1)]++; /*x*/
+    n[lx + yi*(lx+1) + lz*(ly+1)*(lx+1)]++; /*y*/
+    n[lx + ly*(lx+1) + zi*(ly+1)*(lx+1)]++; /*z*/
+  }/*FOR*/
+
+  n[lx + ly*(lx+1) + lz*(ly+1)*(lx+1)] = num; /*total marginal*/
+
+  return n;
+
+}/*TABLE_3D*/
+
+int c_df(int * n, int lx, int ly, int lz, int adjust) {
+
+  int df, xn, yn, xi, yi, zi;
+
+  if (adjust) {
+
+    df = 0;
+    for (zi=0; zi<lz; zi++) {
+  
+      xn = lx;
+      yn = ly;
+  
+      for (xi=0; xi<lx; xi++)
+        if (n[xi + ly*(lx+1) + zi*(ly+1)*(lx+1)] == 0) /* structural zero on xz */
+          xn--;
+  
+      for (yi=0; yi<ly; yi++)
+        if (n[lx + yi*(lx+1) + zi*(ly+1)*(lx+1)] == 0) /* structural zero on yz */
+          yn--;
+  
+      if (xn > 1 && yn > 1)
+        df += (xn-1) * (yn-1);
+  
+    }/*FOR*/
+
+  }/*THEN*/
+  else {
+
+    df = ((double)(lx - 1)) * ((double)(ly - 1)) * ((double)lz);
+
+  }/*THEN*/
+
+  return df;
+
+}/*C_DF*/
+
 /* a rudimental C implementation of which.max(). */
 int which_max(double *array, int length) {
 

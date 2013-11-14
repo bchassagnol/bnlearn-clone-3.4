@@ -55,7 +55,7 @@ SEXP result;
     for (j = 0; j < lly; j++) {
 
       if (n[i][j] != 0)
-        res[0] += n[i][j] * log(n[i][j] / (ni[i] * nj[j]));
+        res[0] += MI_PART(n[i][j], ni[i], nj[j], 1);
 
     }/*FOR*/
 
@@ -133,7 +133,7 @@ SEXP result;
       for (i = 0; i < llx; i++) {
 
         if (n[i][j][k] > 0)
-          res[0] += n[i][j][k] * log( (n[i][j][k] * nk[k]) / (ni[i][k] * nj[j][k]) );
+          res[0] += MI_PART(n[i][j][k], ni[i][k], nj[j][k], nk[k]);
 
       }/*FOR*/
 

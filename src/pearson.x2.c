@@ -1,51 +1,42 @@
 
 #include "common.h"
 
-SEXP x2 (SEXP x, SEXP y) {
+/* conditional Pearson's x2, to be used in C code. */
+double c_cx2(int *n, int lx, int ly, int lz) {
 
-int i = 0, j = 0, k = 0, **n = NULL, *ni = NULL, *nj = NULL;
-int llx = NLEVELS(x), lly = NLEVELS(y), num = LENGTH(x);
-int *xx = INTEGER(x), *yy = INTEGER(y);
+int xi, yi, zi, sum; 
+double res = 0;
+
+  for (zi = 0; zi < lz; zi++)
+    for (yi = 0; yi < ly; yi++)
+      for (xi = 0; xi < lx; xi++)
+        res += X2_PART(
+          n[xi + yi*(lx+1) + zi*(ly+1)*(lx+1)], /*xyz joint*/
+          n[xi + ly*(lx+1) + zi*(ly+1)*(lx+1)], /*xz margin*/
+          n[lx + yi*(lx+1) + zi*(ly+1)*(lx+1)], /*yz margin*/
+          n[lx + ly*(lx+1) + zi*(ly+1)*(lx+1)]); /*z margin*/
+
+  return res;
+
+}/*C_CX2*/
+
+SEXP x2 (SEXP x, SEXP y, SEXP df_adjust) {
+
+int lx = NLEVELS(x), ly = NLEVELS(y);
+int num = LENGTH(x), adj = LOGICAL(df_adjust)[0];
+int *xx = INTEGER(x), *yy = INTEGER(y), *n;
 double *res = NULL;
 SEXP result;
 
-  /* allocate and initialize result to zero. */
   PROTECT(result = allocVector(REALSXP, 2));
   res = REAL(result);
-  res[0] = 0;
-  res[1] = (double)(llx - 1) * (double)(lly - 1);
 
-  /* initialize the contingency table and the marginal frequencies. */
-  n = alloc2dcont(llx, lly);
-  ni = alloc1dcont(llx);
-  nj = alloc1dcont(lly);
+  /* build the contingency table. */
+  n = table_2d(xx, lx, yy, ly, num);
 
-  /* compute the joint frequency of x and y. */
-  for (k = 0; k < num; k++) {
-
-    n[xx[k] - 1][yy[k] - 1]++;
-
-  }/*FOR*/
-
-  /* compute the marginals. */
-  for (i = 0; i < llx; i++)
-    for (j = 0; j < lly; j++) {
-
-      ni[i] += n[i][j];
-      nj[j] += n[i][j];
-
-    }/*FOR*/
-
-  /* compute the X^2 from the joint and marginal frequencies. */
-  for (i = 0; i < llx; i++)
-    for (j = 0; j < lly; j++) {
-
-      if (n[i][j] != 0)
-        res[0] += (n[i][j] - ni[i] * (double)nj[j] / num) *
-                  (n[i][j] - ni[i] * (double)nj[j] / num) /
-                  (ni[i] * (double)nj[j] / num);
-
-    }/*FOR*/
+  /* compute statistic and df. */
+  res[0] = c_cx2(n, lx, ly, 1);
+  res[1] = c_df(n, lx, ly, 1, adj);
 
   UNPROTECT(1);
 
@@ -53,55 +44,23 @@ SEXP result;
 
 }/*X2*/
 
-SEXP cx2 (SEXP x, SEXP y, SEXP z) {
+SEXP cx2 (SEXP x, SEXP y, SEXP z, SEXP df_adjust) {
 
-int i = 0, j = 0, k = 0, ***n = NULL, **ni = NULL, **nj = NULL, *nk = NULL;
-int llx = NLEVELS(x), lly = NLEVELS(y), llz = NLEVELS(z), num = LENGTH(x);
-int *xx = INTEGER(x), *yy = INTEGER(y), *zz = INTEGER(z);
+int lx = NLEVELS(x), ly = NLEVELS(y), lz = NLEVELS(z);
+int num = LENGTH(x), adj = LOGICAL(df_adjust)[0];
+int *xx = INTEGER(x), *yy = INTEGER(y), *zz = INTEGER(z), *n;
 double *res = NULL;
 SEXP result;
 
-  /* allocate  and initialize result to zero. */
   PROTECT(result = allocVector(REALSXP, 2));
   res = REAL(result);
-  res[0] = 0;
-  res[1] = (double)(llx - 1) * (double)(lly - 1) * (double)llz;
 
-  /* initialize the contingency table and the marginal frequencies. */
-  n = alloc3dcont(llx, lly, llz);
-  ni = alloc2dcont(llx, llz);
-  nj = alloc2dcont(lly, llz);
-  nk = alloc1dcont(llz);
+  /* build the contingency table. */
+  n = table_3d(xx, lx, yy, ly, zz, lz, num);
 
-  /* compute the joint frequency of x, y, and z. */
-  for (k = 0; k < num; k++) {
-
-    n[xx[k] - 1][yy[k] - 1][zz[k] - 1]++;
-
-  }/*FOR*/
-
-  /* compute the marginals. */
-  for (i = 0; i < llx; i++)
-    for (j = 0; j < lly; j++)
-      for (k = 0; k < llz; k++) {
-
-        ni[i][k] += n[i][j][k];
-        nj[j][k] += n[i][j][k];
-        nk[k] += n[i][j][k];
-
-      }/*FOR*/
-
-  /* compute the conditional X^2 from the joint and marginal frequencies. */
-  for (i = 0; i < llx; i++)
-    for (j = 0; j < lly; j++)
-      for (k = 0; k < llz; k++) {
-
-        if (n[i][j][k] != 0)
-          res[0] += (n[i][j][k] - ni[i][k] * (double)nj[j][k] / nk[k]) *
-                    (n[i][j][k] - ni[i][k] * (double)nj[j][k] / nk[k]) /
-                    (ni[i][k] * (double)nj[j][k] / nk[k]);
-
-      }/*FOR*/
+  /* compute statistic and df. */
+  res[0] = c_cx2(n, lx, ly, lz);
+  res[1] = c_df(n, lx, ly, lz, adj);
 
   UNPROTECT(1);
 

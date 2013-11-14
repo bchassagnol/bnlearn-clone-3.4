@@ -90,6 +90,11 @@ test.labels = c(
   'smc-zf' = "Fisher's Z (Seq. MC)"
 )
 
+test.extra.args = list(
+  'mi' = c("df.adjust"),
+  'x2' = c("df.adjust")
+)
+
 score.labels = c(
   'k2' = "Cooper & Herskovits' K2",
   'bde' = "Bayesian Dirichlet (BDeu)",

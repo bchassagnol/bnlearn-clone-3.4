@@ -48,6 +48,7 @@
 void mi_matrix(double *mim, void **columns, int dim, int *nlevels, int *num,
     void *cond, int *clevels, int *est) {
 
+int * n;
 int i = 0, j = 0;
 
   switch(*est) {
@@ -60,9 +61,9 @@ int i = 0, j = 0;
 
           for (j = i + 1; j < dim; j++) {
 
-            mim[UPTRI3(i + 1, j + 1, dim)] =
-              c_mi(((int **)columns)[i], nlevels + i,
-                   ((int **)columns)[j], nlevels + j, num);
+            n = table_2d(((int **)columns)[i], nlevels[i],
+                         ((int **)columns)[j], nlevels[j], *num);
+            mim[UPTRI3(i + 1, j + 1, dim)] = c_cmi(n, nlevels[i], nlevels[j], 1);
 
           }/*FOR*/
 
@@ -75,10 +76,11 @@ int i = 0, j = 0;
 
           for (j = i + 1; j < dim; j++) {
 
+            n = table_3d(((int **)columns)[i], nlevels[i],
+                         ((int **)columns)[j], nlevels[j],
+                         (int *)cond, *clevels, *num);
             mim[UPTRI3(i + 1, j + 1, dim)] =
-              c_cmi(((int **)columns)[i], nlevels + i,
-                    ((int **)columns)[j], nlevels + j,
-                    (int *)cond, clevels, num);
+              c_cmi(n, nlevels[i], nlevels[j], *clevels);
 
           }/*FOR*/
 

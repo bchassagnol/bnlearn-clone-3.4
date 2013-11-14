@@ -1761,11 +1761,15 @@ check.learning.algorithm.args = function(args, algorithm, bn) {
           if (!("test.args" %in% names(args)))
             args$test.args = list()
 
-          if (args$test %in% resampling.tests && !("B" %in% names(args$test.args)))
+          if (!("B" %in% names(args$test.args)) && args$test %in% resampling.tests)
             args$test.args$B = bn$learning$args$B
 
-          if (args$test %in% available.discrete.tests && !("power.rule" %in% names(args$test.args)))
-            args$test.args$power.rule = bn$learning$args$power.rule
+          if (args$test %in% available.discrete.tests) {
+            if (!("power.rule" %in% names(args$test.args)))
+              args$test.args$power.rule = bn$learning$args$power.rule
+            if (!("df.adjust" %in% names(args$test.args)) && !args$test %in% resampling.tests)
+              args$test.args$df.adjust = bn$learning$args$df.adjust
+          }#THEN
 
         }#THEN
 
@@ -2210,7 +2214,7 @@ check.test.args = function(test.args, test) {
     B = test.args$B
     if (!is.null(B)) {
 
-      if (!is.positive.integer(B))
+      if (!is.positive.integer(B) && length(B) == 1)
         stop("the number of permutations/bootstrap replications must be a positive integer number.")
       B = as.integer(B)
 
@@ -2241,7 +2245,7 @@ check.test.args = function(test.args, test) {
     pwr = test.args$power.rule
     if (!is.null(pwr)) {
 
-      if (!is.positive.integer(pwr))
+      if (!is.positive.integer(pwr) && length(pwr) == 1)
         stop("the minimum average sample per count (power rule) must be a non-negative integer number.")
       test.args$power.rule = as.integer(pwr)
 
@@ -2253,6 +2257,33 @@ check.test.args = function(test.args, test) {
     if ("power.rule" %in% names(test.args))
       warning("the power rule heuristic does not apply to this test, ignoring power.rule.")
     test.args$power.rule = NULL
+    
+  }#ELSE
+
+  # check the degrees of freedom adjustment heuristic flag.
+  checked.args = c(checked.args, "df.adjust")
+  if ("df.adjust" %in% test.extra.args[[test]]) {
+
+    dfa = test.args$df.adjust
+    if (!is.null(dfa)) {
+
+      if (!is.logical(dfa) && length(dfa) == 1)
+        stop("the degrees of freedom adjustment heuristic flag must be a logical.")
+
+    }#THEN
+    else {
+
+      dfa = TRUE
+
+    }#ELSE
+    test.args$df.adjust = dfa
+
+  }#THEN
+  else {
+
+    if ("df.adjust" %in% names(test.args))
+      warning("the degrees of freedom adjustment heuristic does not apply to this test, ignoring df.adjust.")
+    test.args$df.adjust = NULL
 
   }#ELSE
 

@@ -13,9 +13,10 @@ conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning
   df = NULL
   perm.counter = NULL
 
-  # recover optional parameters
+  # recover extra parameters
   B = test.args$B
   power.rule = test.args$power.rule
+  df.adjust = test.args$df.adjust
 
   # build contingency tables if needed
   if (length(sx) == 0) {
@@ -56,7 +57,7 @@ conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning
     # Mutual Infomation (chi-square asymptotic distribution)
     if (test == "mi") {
 
-      par.test = mi.test(datax, datay, ndata, gsquare = TRUE)
+      par.test = mi.test(datax, datay, ndata, gsquare = TRUE, df.adjust = df.adjust)
       statistic = par.test[1]
       df = par.test[2]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
@@ -74,7 +75,7 @@ conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning
     # Pearson's X^2 test (chi-square asymptotic distribution)
     else if (test == "x2") {
 
-      par.test = x2.test(datax, datay)
+      par.test = x2.test(datax, datay, df.adjust = df.adjust)
       statistic = par.test[1]
       df = par.test[2]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
@@ -212,7 +213,7 @@ conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning
     # Conditional Mutual Infomation (chi-square asymptotic distribution)
     if (test == "mi") {
 
-      par.test = cmi.test(datax, datay, config, ndata, gsquare = TRUE)
+      par.test = cmi.test(datax, datay, config, ndata, gsquare = TRUE, df.adjust = df.adjust)
       statistic = par.test[1]
       df = par.test[2]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
@@ -230,7 +231,7 @@ conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning
     # Pearson's X^2 test (chi-square asymptotic distribution)
     else if (test == "x2") {
 
-      par.test = cx2.test(datax, datay, config)
+      par.test = cx2.test(datax, datay, config, df.adjust = df.adjust)
       statistic = par.test[1]
       df = par.test[2]
       p.value = pchisq(statistic, df, lower.tail = FALSE)
@@ -398,6 +399,9 @@ conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning
     # power rule average threshold.
     if (!is.null(power.rule))
       result$parameter[["Power Rule threshold"]] = power.rule
+    # degrees of freedom adjustement.
+    if (!is.null(df.adjust))
+      result$parameter[["DF adjustment"]] = df.adjust
 
     return(result)
 
@@ -406,12 +410,13 @@ conditional.test = function(x, y, sx, data, test, test.args, alpha = 1, learning
 }#CONDITIONAL.TEST
 
 # Mutual Information (discrete data)
-mi.test = function(x, y, ndata, gsquare = TRUE) {
+mi.test = function(x, y, ndata, gsquare = TRUE, df.adjust = TRUE) {
 
   s = .Call("mi",
       x = x,
       y = y,
       gsquare = gsquare,
+      df_adjust = df.adjust,
       PACKAGE = "bnlearn")
 
 }#MI.TEST
@@ -441,13 +446,14 @@ mc.test = function(x, y, samples, alpha, test) {
 }#MC.TEST
 
 # Conditional Mutual Information (discrete data)
-cmi.test = function(x, y, z, ndata, gsquare = TRUE) {
+cmi.test = function(x, y, z, ndata, gsquare = TRUE, df.adjust = TRUE) {
 
   s = .Call("cmi",
       x = x,
       y = y,
       z = z,
       gsquare = gsquare,
+      df_adjust = df.adjust,
       PACKAGE = "bnlearn")
 
 }#CMI.TEST
@@ -545,22 +551,24 @@ cgmc.test = function(x, y, sx, data, ndata, samples, alpha, test) {
 }#CGMC.TEST
 
 # Pearson's X^2 test (discrete data)
-x2.test = function(x, y) {
+x2.test = function(x, y, df.adjust = TRUE) {
 
   .Call("x2",
       x = x,
       y = y,
+      df_adjust = df.adjust,
       PACKAGE = "bnlearn")
 
 }#X2.TEST
 
 # Pearson's Conditional X^2 test (discrete data)
-cx2.test = function(x, y, z) {
+cx2.test = function(x, y, z, df.adjust = TRUE) {
 
   .Call("cx2",
       x = x,
       y = y,
       z = z,
+      df_adjust = df.adjust,
       PACKAGE = "bnlearn")
 
 }#CX2.TEST

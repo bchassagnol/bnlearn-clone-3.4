@@ -277,6 +277,11 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     if (!is.null(test.args) && !is.null(test.args$power.rule))
       learning$args$power.rule = test.args$power.rule
 
+    # include also the degrees of freedom adjustment heuristic
+    # if it makes sense.
+    if (!is.null(test.args) && !is.null(test.args$df.adjust))
+      learning$args$df.adjust = test.args$df.adjust
+
     res = list(learning = learning,
       nodes = cache.structure(names(mb), arcs = arcs), arcs = arcs)
 

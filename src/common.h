@@ -68,6 +68,9 @@ SEXP minimal_data_frame(SEXP obj);
 SEXP dataframe_column(SEXP dataframe, SEXP name, SEXP drop);
 SEXP c_dataframe_column(SEXP dataframe, SEXP name, int drop);
 SEXP int2fac(SEXP vector, int *nlevels);
+int * table_2d(int *xx, int lx, int *yy, int ly, int num);
+int * table_3d(int *xx, int lx, int *yy, int ly, int *z, int lz, int num);
+int c_df(int * n, int lx, int ly, int lz, int adjust);
 
 /* from sampling.c */
 
@@ -148,6 +151,14 @@ SEXP root_nodes(SEXP bn, SEXP leaves);
 
 SEXP schedule(SEXP bn, SEXP root_nodes, SEXP reverse, SEXP debug);
 
+/* from pearson.x2.c*/
+
+#define X2_PART(cell, xmarg, ymarg, zmarg) \
+  ((cell) == 0 ? 0 : \
+    (((double)(cell)) - ((double)(xmarg)) * ((double)(ymarg)) / ((double)(zmarg))) * \
+    (((double)(cell)) - ((double)(xmarg)) * ((double)(ymarg)) / ((double)(zmarg))) / \
+    (((double)(xmarg)) * ((double)(ymarg)) / ((double)(zmarg))))
+
 /* from mutual.information.c */
 
 #define MI_PART(cell, xmarg, ymarg, zmarg) \
@@ -155,8 +166,7 @@ SEXP schedule(SEXP bn, SEXP root_nodes, SEXP reverse, SEXP debug);
     ((double)(cell)) * log(((double)(cell)) * ((double)(zmarg)) / \
     (((double)(xmarg)) * ((double)(ymarg)))))
 
-double c_mi(int *xx, int *llx, int *yy, int *lly, int *num);
-double c_cmi(int *xx, int *llx, int *yy, int *lly, int *zz, int *llz, int *num);
+double c_cmi(int *n, int lx, int ly, int lz);
 double c_mig(double *xx, double *yy, int *num);
 
 /* memory allocation functions */
