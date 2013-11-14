@@ -69,7 +69,7 @@ empty.graph = function(nodes, num = 1) {
 }#EMPTY.GRAPH
 
 # perform conditional probability queries.
-cpquery = function(fitted, event, evidence, cluster = NULL, method = "ls", ..., debug = FALSE) {
+cpquery = function(fitted, event, evidence = TRUE, cluster = NULL, method = "ls", ..., debug = FALSE) {
 
   # check fitted's class.
   check.fit(fitted)
@@ -78,8 +78,6 @@ cpquery = function(fitted, event, evidence, cluster = NULL, method = "ls", ..., 
   # check event and evidence.
   if (missing(event))
     stop("the expression describing the event is missing.")
-  if (missing(evidence))
-    stop("the expression describing the evidence is missing.")
   # check the generation method.
   if (!(method %in% cpq.algorithms))
     stop(paste(c("valid conditional probability query methods are:\n",
@@ -106,26 +104,25 @@ cpquery = function(fitted, event, evidence, cluster = NULL, method = "ls", ..., 
   # the backend and beyond.
   event = substitute(event)
 
-  # recheck event and evidence expression after deparsing.
+  # recheck event expression after deparsing.
   if (!(is.language(event) || identical(event, TRUE)))
     stop("event must be an unevaluated expression or TRUE.")
-  if (method == "ls") {
 
-    if (missing(evidence))
-      stop("the expression describing the evidence is missing.")
-
-    # deparse evidence expression before passing it to the backend and beyond.
-    evidence = substitute(evidence)
-    # recheck event and evidence expression after deparsing.
-    if (!(is.language(evidence) || identical(evidence, TRUE)))
-      stop("evidence must be an unevaluated expression or TRUE.")
-
-  }#THEN
-  else if (method == "lw") {
+  if (method == "lw") {
 
     evidence = check.mutilated.evidence(evidence, fitted)
 
   }#THEN
+  else {
+
+    # deparse evidence expression before passing it to the backend and beyond.
+    evidence = substitute(evidence)
+
+    # recheck evidence expression after deparsing.
+    if (!(is.language(evidence) || identical(evidence, TRUE)))
+      stop("evidence must be an unevaluated expression or TRUE.")
+
+  }#ELSE
 
   # special-case pointless queries.
   if (isTRUE(event))
@@ -138,7 +135,7 @@ cpquery = function(fitted, event, evidence, cluster = NULL, method = "ls", ..., 
 }#CPQUERY
 
 # compute conditional probability distributions
-cpdist = function(fitted, nodes, evidence, cluster = NULL, method = "ls", ..., debug = FALSE) {
+cpdist = function(fitted, nodes, evidence = TRUE, cluster = NULL, method = "ls", ..., debug = FALSE) {
 
   # check fitted's class.
   check.fit(fitted)
@@ -168,21 +165,19 @@ cpdist = function(fitted, nodes, evidence, cluster = NULL, method = "ls", ..., d
   extra.args = check.cpq.args(fitted = fitted, extra.args = list(...),
                  method = method)
 
-  if (method == "ls") {
+  if (method == "lw") {
+    
+    evidence = check.mutilated.evidence(evidence, fitted)
 
-    if (missing(evidence))
-      stop("the expression describing the evidence is missing.")
+  }#THEN
+  else {
 
     # deparse evidence expression before passing it to the backend and beyond.
     evidence = substitute(evidence)
-    # recheck event and evidence expression after deparsing.
+
+    # recheck evidence expression after deparsing.
     if (!(is.language(evidence) || identical(evidence, TRUE)))
       stop("evidence must be an unevaluated expression or TRUE.")
-
-  }#THEN
-  else if (method == "lw") {
-
-    evidence = check.mutilated.evidence(evidence, fitted)
 
   }#THEN
 

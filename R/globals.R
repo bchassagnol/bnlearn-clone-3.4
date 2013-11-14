@@ -152,11 +152,12 @@ graph.generation.extra.args = list(
   "averaged" = "threshold"
 )
 
-cpq.algorithms = c("ls", "lw")
+cpq.algorithms = c("ls", "lw", "exact")
 
 cpq.labels = c(
   "ls" = "Logic/Forward Sampling",
-  "lw" = "Likelihood Weighting"
+  "lw" = "Likelihood Weighting",
+  "exact" = "Exact Inference"
 )
 
 cpq.extra.args = list(
