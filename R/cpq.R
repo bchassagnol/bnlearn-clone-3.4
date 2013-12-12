@@ -645,7 +645,7 @@ exact.dist = function(fitted, event, evidence, debug = FALSE) {
   probs = exact.cpt(fitted, event, evidence, debug)
 
   for(col in 1:(ncol(probs)-1)) {
-    probs[, col] = factor(probs[, col])
+    probs[, col] = factor(probs[, col], exclude=NULL)
     probs = probs[order(probs[, col]), ]
   }#FOR
   
