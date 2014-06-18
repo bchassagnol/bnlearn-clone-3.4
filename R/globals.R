@@ -24,8 +24,8 @@ available.discrete.mi = c("mi")
 available.continuous.mi = c("mi-g")
 available.mi = c(available.discrete.mi, available.continuous.mi)
 
-markov.blanket.algorithms = c("gs", "iamb", "fast.iamb", "inter.iamb", "fdr.iamb")
 local.search.algorithms = c("mmpc", "si.hiton.pc", "hpc")
+markov.blanket.algorithms = c("gs", "iamb", "fast.iamb", "inter.iamb", "fdr.iamb", "k.iamb")
 constraint.based.algorithms = c(markov.blanket.algorithms, local.search.algorithms)
 score.based.algorithms = c("hc", "tabu")
 hybrid.algorithms = c("rsmax2", "mmhc", "h2pc")
@@ -44,6 +44,7 @@ method.labels = c(
   'fast.iamb' = "Fast-IAMB",
   'inter.iamb' = "Inter-IAMB",
   "fdr.iamb" = "FDR-IAMB",
+  'k.iamb' = "K-IAMB",
   'rnd' = "random/generated",
   'hc' = "Hill-Climbing",
   'tabu' = "Tabu Search",
@@ -63,6 +64,8 @@ method.extra.args = list(
   'hc' = c("max.iter", "restart", "perturb"),
   'tabu' = c("max.iter", "tabu", "max.tabu"),
   'hpc' = c("pc.method", "nbr.join")
+  'hpc' = c("pc.method", "nbr.join"),
+  'k.iamb' = c("k")
 )
 
 test.labels = c(

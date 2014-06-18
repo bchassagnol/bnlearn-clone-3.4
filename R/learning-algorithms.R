@@ -178,6 +178,21 @@ bnlearn = function(x, cluster = NULL, whitelist = NULL, blacklist = NULL,
     }#ELSE
 
   }#THEN
+  else if (method == "k.iamb") {
+    
+    if (!is.null(blacklist) || !is.null(whitelist)) {
+      stop("blacklist and whitelist unsupported yet.")
+    }
+    
+    k = check.kiamb.k(extra.args$k)
+    nbr.join = check.nbr.join(extra.args$nbr.join)
+
+    mb = kiamb.global(
+      x = x, whitelist = whitelist, blacklist = blacklist,
+      test = test, alpha = alpha, nbr.join = nbr.join, k = k, 
+      test.args = test.args, strict = strict, debug = debug)
+
+  }#THEN
   else if (method == "mmpc") {
 
     if (cluster.aware) {
@@ -676,6 +691,15 @@ mb.backend = function(x, target, method, whitelist = NULL, blacklist = NULL,
 
     mb = iambfdr(x = target, data = x, nodes = nodes, alpha = alpha, test.args = test.args,
                  whitelist = whitelist, blacklist = NULL, backtracking = NULL,
+                 test = test, debug = debug)
+
+  }#THEN
+  else if (method == "k.iamb") {
+
+    k = check.kiamb.k(extra.args$k)
+
+    mb = kiamb(x = target, data = x, nodes = nodes, alpha = alpha, test.args = test.args,
+                 k = k, whitelist = whitelist, blacklist = NULL, backtracking = NULL,
                  test = test, debug = debug)
 
   }#THEN
