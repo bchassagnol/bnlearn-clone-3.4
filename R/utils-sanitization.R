@@ -2245,7 +2245,7 @@ check.test.args = function(test.args, test) {
     pwr = test.args$power.rule
     if (!is.null(pwr)) {
 
-      if (!is.positive.integer(pwr) && length(pwr) == 1)
+      if (!is.non.negative(pwr) && length(pwr) == 1)
         stop("the minimum average sample per count (power rule) must be a non-negative integer number.")
       test.args$power.rule = as.integer(pwr)
 
