@@ -63,7 +63,6 @@ method.labels = c(
 method.extra.args = list(
   'hc' = c("max.iter", "restart", "perturb"),
   'tabu' = c("max.iter", "tabu", "max.tabu"),
-  'hpc' = c("pc.method", "nbr.join")
   'hpc' = c("pc.method", "nbr.join"),
   'k.iamb' = c("k")
 )
