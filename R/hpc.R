@@ -130,7 +130,7 @@ hybrid.pc = function(t, data, nodes, whitelist, blacklist, test, alpha,
   }#FOR
 
   if (debug)
-    cat(" * PC of", t, "=", pc, "\n")
+    cat(" * PC of", t, "=", pc, "\n\n\n\n")
 
   res = list(nbr = pc, mb = c(pcs, rsps))
 
